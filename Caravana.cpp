@@ -1,23 +1,50 @@
 // Caravana.cpp
 #include "Caravana.h"
 #include <iostream>
+#include <cstdlib>
 
 Caravana::Caravana(int linha, int coluna, int capacidadeCarga, int tripulacao, int agua, const std::string& tipo)
-        : linha(linha), coluna(coluna), capacidadeCarga(capacidadeCarga), tripulacao(tripulacao), agua(agua), tipo(tipo), movimentoAutomatico(false) {}
+        : linha(linha), coluna(coluna), capacidadeCarga(capacidadeCarga), tripulacao(tripulacao), agua(agua), tipo(tipo), movimentoAutomatico(false), moedas(0) {}
 
-void Caravana::mover(int novaLinha, int novaColuna) {
-    linha = novaLinha;
-    coluna = novaColuna;
+void Caravana::mover(const std::string& direcao, Mapa* mapa) {
+    int novaLinha = linha;
+    int novaColuna = coluna;
+
+    if (direcao == "D") novaColuna++;
+    else if (direcao == "E") novaColuna--;
+    else if (direcao == "C") novaLinha--;
+    else if (direcao == "B") novaLinha++;
+    else if (direcao == "CE") { novaLinha--; novaColuna--; }
+    else if (direcao == "CD") { novaLinha--; novaColuna++; }
+    else if (direcao == "BE") { novaLinha++; novaColuna--; }
+    else if (direcao == "BD") { novaLinha++; novaColuna++; }
+
+    moverNoMapa(mapa, novaLinha, novaColuna);
+}
+
+void Caravana::moverNoMapa(Mapa* mapa, int novaLinha, int novaColuna) {
+    if (mapa->obterPosicao(novaLinha, novaColuna) == '.') {
+        mapa->atualizarPosicao(linha, coluna, '.');
+        linha = novaLinha;
+        coluna = novaColuna;
+        mapa->atualizarPosicao(linha, coluna, 'C');
+    } else {
+        std::cout << "Movimento inválido: posição ocupada." << std::endl;
+    }
 }
 
 void Caravana::imprimirInfo() const {
-    std::cout << "Caravana do tipo " << tipo << " na posição (" << linha << ", " << coluna << ")" << std::endl;
+    std::cout << "Tipo: " << tipo << ", Posição: (" << linha << ", " << coluna << ")";
+    std::cout << ", Capacidade de Carga: " << capacidadeCarga << ", Tripulação: " << tripulacao << ", Água: " << agua << ", Moedas: " << moedas << std::endl;
 }
 
-void Caravana::executarMovimentoAutonomo() {
-    // Implementação fictícia para movimentação automática
-    linha += 1;
-    coluna += 1;
+void Caravana::executarMovimentoAutonomo(Mapa* mapa) {
+    int novaColuna = coluna + 1;
+    if (novaColuna < mapa->getColunas() && mapa->obterPosicao(linha, novaColuna) == '.') {
+        moverNoMapa(mapa, linha, novaColuna);
+    } else {
+        std::cout << "Movimento automático bloqueado." << std::endl;
+    }
 }
 
 void Caravana::ativarMovimentoAutomatico() {
@@ -28,7 +55,7 @@ void Caravana::desativarMovimentoAutomatico() {
     movimentoAutomatico = false;
 }
 
-bool Caravana::getMovimentoAutomatico() const {
+bool Caravana::isMovimentoAutomatico() const {
     return movimentoAutomatico;
 }
 
@@ -43,12 +70,25 @@ bool Caravana::estaDestruida() const {
     return tripulacao <= 0;
 }
 
-void Caravana::adicionarAgua(int quantidade) {
-    agua += quantidade;
+bool Caravana::estaAdjacente(Caravana* outra) const {
+    return (abs(linha - outra->getLinha()) <= 1) && (abs(coluna - outra->getColuna()) <= 1);
 }
 
-void Caravana::adicionarTripulacao(int quantidade) {
-    tripulacao += quantidade;
+void Caravana::combater(Caravana* outra, Mapa* mapa) {
+    int dano = std::rand() % 10 + 1;
+    sofrerDano(dano);
+    outra->sofrerDano(dano);
+    std::cout << "Combate entre " << tipo << " e " << outra->getTipo() << ". Dano infligido: " << dano << std::endl;
+
+    if (estaDestruida()) {
+        std::cout << "A caravana do tipo " << tipo << " foi destruída!" << std::endl;
+        mapa->atualizarPosicao(linha, coluna, '.');
+    }
+
+    if (outra->estaDestruida()) {
+        std::cout << "A caravana do tipo " << outra->getTipo() << " foi destruída!" << std::endl;
+        mapa->atualizarPosicao(outra->getLinha(), outra->getColuna(), '.');
+    }
 }
 
 int Caravana::getLinha() const {
@@ -63,36 +103,28 @@ std::string Caravana::getTipo() const {
     return tipo;
 }
 
-// Implementação das subclasses
-CaravanaComercio::CaravanaComercio(int linha, int coluna)
-        : Caravana(linha, coluna, 100, 10, 50, "Comércio") {}
-
-void CaravanaComercio::executarMovimentoAutonomo() {
-    // Implementação específica para movimentação automática da caravana de comércio
-    linha += 1;
+void Caravana::adicionarTripulantes(int quantidade) {
+    tripulacao += quantidade;
+    if (tripulacao > capacidadeCarga) {
+        tripulacao = capacidadeCarga;
+    }
 }
 
-CaravanaMilitar::CaravanaMilitar(int linha, int coluna)
-        : Caravana(linha, coluna, 150, 20, 100, "Militar") {}
-
-void CaravanaMilitar::executarMovimentoAutonomo() {
-    // Implementação específica para movimentação automática da caravana militar
-    linha -= 1;
+void Caravana::removerTripulantes(int quantidade) {
+    tripulacao -= quantidade;
+    if (tripulacao < 0) {
+        tripulacao = 0;
+    }
 }
 
-CaravanaSecreta::CaravanaSecreta(int linha, int coluna)
-        : Caravana(linha, coluna, 50, 5, 20, "Secreta") {}
-
-void CaravanaSecreta::executarMovimentoAutonomo() {
-    // Implementação específica para movimentação automática da caravana secreta
-    coluna -= 1;
+void Caravana::adicionarMoedas(int quantidade) {
+    moedas += quantidade;
 }
 
-CaravanaBarbara::CaravanaBarbara(int linha, int coluna)
-        : Caravana(linha, coluna, 200, 15, 0, "Bárbara") {}
+int Caravana::getTripulacao() const {
+    return tripulacao;
+}
 
-void CaravanaBarbara::executarMovimentoAutonomo() {
-    // Implementação específica para movimentação automática da caravana bárbara
-    linha -= 1;
-    coluna += 1;
+int Caravana::getMoedas() const {
+    return moedas;
 }

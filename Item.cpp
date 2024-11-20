@@ -1,3 +1,4 @@
+// Item.cpp
 #include "Item.h"
 
 Item::Item(int linha, int coluna, const std::string& tipo, int duracao)
@@ -21,10 +22,6 @@ int Item::getDuracao() const {
 
 void Item::reduzirDuracao() {
     if (duracao > 0) {
-        duracao--;
+        --duracao;
     }
-}
-
-bool Item::estaAtivo() const {
-    return duracao > 0;
 }

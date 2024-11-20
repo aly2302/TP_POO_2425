@@ -1,20 +1,19 @@
 // Buffer.cpp
 #include "Buffer.h"
 #include <iostream>
+#include <cstring>
 
 Buffer::Buffer(int linhas, int colunas) : linhas(linhas), colunas(colunas), cursorLinha(0), cursorColuna(0) {
     buffer = new char[linhas * colunas];
-    esvaziarBuffer();
+    limparBuffer();
 }
 
 Buffer::~Buffer() {
     delete[] buffer;
 }
 
-void Buffer::esvaziarBuffer() {
-    for (int i = 0; i < linhas * colunas; ++i) {
-        buffer[i] = ' ';
-    }
+void Buffer::limparBuffer() {
+    std::memset(buffer, ' ', linhas * colunas);
 }
 
 void Buffer::moverCursor(int linha, int coluna) {
@@ -24,32 +23,25 @@ void Buffer::moverCursor(int linha, int coluna) {
     }
 }
 
-void Buffer::imprimirChar(char c) {
-    if (cursorLinha >= 0 && cursorLinha < linhas && cursorColuna >= 0 && cursorColuna < colunas) {
-        buffer[cursorLinha * colunas + cursorColuna] = c;
-        cursorColuna++;
-        if (cursorColuna >= colunas) {
-            cursorColuna = 0;
-            cursorLinha++;
-        }
+void Buffer::escreverCaractere(char c) {
+    int index = cursorLinha * colunas + cursorColuna;
+    if (index < linhas * colunas) {
+        buffer[index] = c;
+        cursorColuna = (cursorColuna + 1) % colunas;
     }
 }
 
-void Buffer::imprimirString(const std::string& str) {
-    for (char c : str) {
-        imprimirChar(c);
+void Buffer::escreverString(const char* str) {
+    while (*str) {
+        escreverCaractere(*str++);
     }
 }
 
-void Buffer::imprimirInt(int valor) {
-    imprimirString(std::to_string(valor));
-}
-
-void Buffer::transcreverParaConsola() const {
+void Buffer::imprimirBuffer() const {
     for (int i = 0; i < linhas; ++i) {
         for (int j = 0; j < colunas; ++j) {
             std::cout << buffer[i * colunas + j];
         }
-        std::cout << '\n';
+        std::cout << std::endl;
     }
 }

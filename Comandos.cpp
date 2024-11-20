@@ -17,25 +17,29 @@ void Comandos::interpretarComando(const std::string& comando) {
     if (palavra == "config") {
         std::string nomeFicheiro;
         iss >> nomeFicheiro;
-        *mapa = Mapa(nomeFicheiro);
-        std::cout << "Mapa configurado a partir do ficheiro: " << nomeFicheiro << std::endl;
+        try {
+            *mapa = Mapa(nomeFicheiro);
+            std::cout << "Mapa configurado a partir do ficheiro: " << nomeFicheiro << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Erro ao configurar o mapa: " << e.what() << std::endl;
+        }
     } else if (palavra == "sair") {
         std::cout << "Encerrando o programa..." << std::endl;
         exit(0);
     } else if (palavra == "move") {
-        int id, linha, coluna;
-        iss >> id >> linha >> coluna;
-        if (id >= 0 && id < caravanas.size()) {
-            caravanas[id]->mover(linha, coluna);
-            mapa->atualizarPosicao(linha, coluna, 'C'); // Atualizar posição no mapa
-            std::cout << "Caravana " << id << " movida para (" << linha << ", " << coluna << ")." << std::endl;
+        int id;
+        std::string direcao;
+        iss >> id >> direcao;
+        if (validarCaravanaId(id)) {
+            moverCaravana(direcao, id);
         } else {
             std::cout << "ID de caravana inválido." << std::endl;
         }
     } else if (palavra == "compra") {
         int id, quantidade;
         iss >> id >> quantidade;
-        if (id >= 0 && id < caravanas.size()) {
+        if (validarCaravanaId(id)) {
+            caravanas[id]->adicionarTripulantes(quantidade);
             std::cout << "Comprando " << quantidade << " unidades para a caravana " << id << "." << std::endl;
         } else {
             std::cout << "ID de caravana inválido." << std::endl;
@@ -50,7 +54,7 @@ void Comandos::interpretarComando(const std::string& comando) {
     } else if (palavra == "auto") {
         int id;
         iss >> id;
-        if (id >= 0 && id < caravanas.size()) {
+        if (validarCaravanaId(id)) {
             caravanas[id]->ativarMovimentoAutomatico();
             std::cout << "Movimento automático ativado para a caravana " << id << "." << std::endl;
         } else {
@@ -66,69 +70,66 @@ void Comandos::interpretarComando(const std::string& comando) {
     }
 }
 
-void Comandos::adicionarCaravana(Caravana* caravana) {
-    caravanas.push_back(caravana);
-}
-
-void Comandos::adicionarItem(Item* item) {
-    itens.push_back(item);
-    mapa->atualizarPosicao(item->getLinha(), item->getColuna(), 'I');
+bool Comandos::validarCaravanaId(int id) const {
+    return id >= 0 && id < caravanas.size();
 }
 
 void Comandos::processarTurno() {
+    // Movimentação automática das caravanas
     for (auto& caravana : caravanas) {
-        if (caravana->getMovimentoAutomatico()) {
-            int linhaAtual = caravana->getLinha();
-            int colunaAtual = caravana->getColuna();
-            mapa->atualizarPosicao(linhaAtual, colunaAtual, '.'); // Limpar posição anterior
-            caravana->executarMovimentoAutonomo();
-            linhaAtual = caravana->getLinha();
-            colunaAtual = caravana->getColuna();
-            mapa->atualizarPosicao(linhaAtual, colunaAtual, 'C'); // Atualizar nova posição
+        if (caravana->isMovimentoAutomatico()) {
+            caravana->executarMovimentoAutonomo(mapa);
         }
     }
 
-    // Processar itens
-    for (auto it = itens.begin(); it != itens.end(); ) {
-        (*it)->reduzirDuracao();
-        if (!(*it)->estaAtivo()) {
-            mapa->atualizarPosicao((*it)->getLinha(), (*it)->getColuna(), '.');
-            delete *it;
-            it = itens.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
-    // Geração de tempestades de areia
-    if (--turnosParaTempestade <= 0) {
-        int linha = std::rand() % mapa->getLinhas();
-        int coluna = std::rand() % mapa->getColunas();
-        gerarTempestadeDeAreia(linha, coluna, 2);
-        turnosParaTempestade = 5;
-    }
-
-    // Geração de novos itens
+    // Gerar novos itens a cada ciclo configurado
     if (--turnosParaItens <= 0) {
         int linha = std::rand() % mapa->getLinhas();
         int coluna = std::rand() % mapa->getColunas();
-        adicionarItem(new Item(linha, coluna, "Surpresa", 20));
+        if (mapa->obterPosicao(linha, coluna) == '.') {
+            Item* novoItem = new Item(linha, coluna, "Surpresa", 20);
+            adicionarItem(novoItem);
+        }
         turnosParaItens = 10;
     }
 
-    // Geração de novas caravanas bárbaras
+    // Movimentação e geração de bárbaros
     if (--turnosParaBarbaros <= 0) {
         int linha = std::rand() % mapa->getLinhas();
         int coluna = std::rand() % mapa->getColunas();
-        CaravanaBarbara* novaBarbara = new CaravanaBarbara(linha, coluna);
-        adicionarCaravana(novaBarbara);
+        if (mapa->obterPosicao(linha, coluna) == '.') {
+            Caravana* barbaros = new Caravana(linha, coluna, 0, 40, 0, "Bárbara");
+            adicionarCaravana(barbaros);
+        }
         turnosParaBarbaros = 15;
     }
 
-    // Verificar e processar combates
     verificarCombates();
 
-    mapa->imprimirMapa();
+    // Atualização visual do mapa
+    Buffer buffer(mapa->getLinhas(), mapa->getColunas());
+    mapa->imprimirMapa(buffer);
+}
+
+void Comandos::moverCaravana(const std::string& direcao, int id) {
+    int novaLinha = caravanas[id]->getLinha();
+    int novaColuna = caravanas[id]->getColuna();
+
+    if (direcao == "D") novaColuna++;
+    else if (direcao == "E") novaColuna--;
+    else if (direcao == "C") novaLinha--;
+    else if (direcao == "B") novaLinha++;
+    else if (direcao == "CE") { novaLinha--; novaColuna--; }
+    else if (direcao == "CD") { novaLinha--; novaColuna++; }
+    else if (direcao == "BE") { novaLinha++; novaColuna--; }
+    else if (direcao == "BD") { novaLinha++; novaColuna++; }
+
+    if (mapa->obterPosicao(novaLinha, novaColuna) == '.') {
+        caravanas[id]->moverNoMapa(mapa, novaLinha, novaColuna);
+        std::cout << "Caravana " << id << " movida para (" << novaLinha << ", " << novaColuna << ")." << std::endl;
+    } else {
+        std::cout << "Movimento inválido: posição ocupada ou intransponível." << std::endl;
+    }
 }
 
 void Comandos::verificarCombates() {
@@ -141,13 +142,11 @@ void Comandos::verificarCombates() {
                 (abs(caravana1->getColuna() - caravana2->getColuna()) <= 1)) {
 
                 if (caravana1->getTipo() == "Bárbara" || caravana2->getTipo() == "Bárbara") {
-                    // Sorteia o dano infligido
                     int dano = std::rand() % 10 + 1;
                     caravana1->sofrerDano(dano);
                     caravana2->sofrerDano(dano);
                     std::cout << "Combate entre " << caravana1->getTipo() << " e " << caravana2->getTipo() << ". Dano infligido: " << dano << std::endl;
 
-                    // Remover caravanas destruídas
                     if (caravana1->estaDestruida()) {
                         std::cout << "A caravana do tipo " << caravana1->getTipo() << " foi destruída!" << std::endl;
                         mapa->atualizarPosicao(caravana1->getLinha(), caravana1->getColuna(), '.');
@@ -176,20 +175,20 @@ void Comandos::gerarTempestadeDeAreia(int linha, int coluna, int raio) {
             int novaLinha = linha + i;
             int novaColuna = coluna + j;
             if (novaLinha >= 0 && novaLinha < mapa->getLinhas() && novaColuna >= 0 && novaColuna < mapa->getColunas()) {
-                mapa->atualizarPosicao(novaLinha, novaColuna, 'A'); // A de areia
+                mapa->atualizarPosicao(novaLinha, novaColuna, 'A');
             }
         }
     }
 }
 
 
-int Comandos::getNumeroCaravanas() const {
-    return caravanas.size();
+// Implementação de funções ausentes no Comandos.cpp
+void Comandos::adicionarCaravana(Caravana* caravana) {
+    caravanas.push_back(caravana);
+    mapa->atualizarPosicao(caravana->getLinha(), caravana->getColuna(), 'C');
 }
 
-Caravana* Comandos::getCaravana(int id) {
-    if (id < 0 || id >= caravanas.size()) {
-        throw std::out_of_range("ID de caravana inválido.");
-    }
-    return caravanas[id];
+void Comandos::adicionarItem(Item* item) {
+    itens.push_back(item);
+    mapa->atualizarPosicao(item->getLinha(), item->getColuna(), 'I');
 }
