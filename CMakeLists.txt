@@ -8,4 +8,10 @@ add_executable(TP_POO_2425 main.cpp
         Buffer.h
         Mapa.h
         Mapa.cpp
+        Caravana.cpp
+        Caravana.h
+        Comandos.cpp
+        Comandos.h
+        Item.cpp
+        Item.h
 )

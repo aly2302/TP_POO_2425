@@ -1,48 +1,40 @@
 #ifndef TP_POO_2425_BUFFER_H
 #define TP_POO_2425_BUFFER_H
 
-#include <iostream>
-#include <stdexcept>
 #include <string>
 
 class Buffer {
-    char* grid;              // Armazena o buffer como um array linear
-    int rows, cols;          // Dimensões do buffer
-    int cursor_row, cursor_col; // Posição atual do cursor
+private:
+    char* buffer;
+    int linhas;
+    int colunas;
+    int cursorLinha;
+    int cursorColuna;
 
 public:
-    // Construtor que inicializa o buffer com as dimensões especificadas
-    Buffer(int rows, int cols);
+    // Construtor para inicializar o buffer com dimensões definidas em tempo de execução
+    Buffer(int linhas, int colunas);
 
-    // Destrutor para liberar memória
+    // Destrutor para libertar a memória
     ~Buffer();
 
-    // Esvaziar o buffer (preencher com espaços)
-    void clear();
+    // Método para esvaziar o buffer (preencher com espaços)
+    void esvaziarBuffer();
 
-    // Transcrever o conteúdo do buffer para a consola
-    void print() const;
+    // Método para mover o cursor para uma linha e coluna específicas
+    void moverCursor(int linha, int coluna);
 
-    // Mover o cursor para uma posição específica
-    void moveCursor(int row, int col);
+    // Método para imprimir um caractere no cursor atual
+    void imprimirChar(char c);
 
-    // Escrever um caráter no buffer
-    void write(char c);
+    // Método para imprimir uma string no cursor atual
+    void imprimirString(const std::string& str);
 
-    // Escrever uma string no buffer
-    void write(const char* str);
+    // Método para imprimir um inteiro no cursor atual
+    void imprimirInt(int valor);
 
-    // Escrever um inteiro no buffer
-    void write(int num);
-
-    // Operadores para facilitar uso
-    Buffer& operator<<(char c);
-    Buffer& operator<<(const char* str);
-    Buffer& operator<<(int num);
-
-private:
-    // Avança o cursor para a próxima posição
-    void advanceCursor();
+    // Método para transcrever o conteúdo do buffer para a consola
+    void transcreverParaConsola() const;
 };
 
 
