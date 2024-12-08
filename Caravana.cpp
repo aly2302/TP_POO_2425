@@ -1,130 +1,130 @@
 // Caravana.cpp
 #include "Caravana.h"
-#include <iostream>
-#include <cstdlib>
+#include "Mapa.h"
+#include <stdexcept>
 
-Caravana::Caravana(int linha, int coluna, int capacidadeCarga, int tripulacao, int agua, const std::string& tipo)
-        : linha(linha), coluna(coluna), capacidadeCarga(capacidadeCarga), tripulacao(tripulacao), agua(agua), tipo(tipo), movimentoAutomatico(false), moedas(0) {}
+// Implementação da classe base Caravana
+Caravana::Caravana(int id, int linha, int coluna, int capacidadeCarga, int capacidadeAgua, int tripulantesInicial)
+        : id(id), linha(linha), coluna(coluna), capacidadeCarga(capacidadeCarga), capacidadeAgua(capacidadeAgua),
+          tripulantes(tripulantesInicial), aguaAtual(capacidadeAgua), cargaAtual(0) {}
 
-void Caravana::mover(const std::string& direcao, Mapa* mapa) {
-    int novaLinha = linha;
-    int novaColuna = coluna;
+int Caravana::getId() const { return id; }
+int Caravana::getLinha() const { return linha; }
+int Caravana::getColuna() const { return coluna; }
+int Caravana::getCapacidadeCarga() const { return capacidadeCarga; }
+int Caravana::getCapacidadeAgua() const { return capacidadeAgua; }
+int Caravana::getTripulantes() const { return tripulantes; }
+int Caravana::getAguaAtual() const { return aguaAtual; }
+int Caravana::getCargaAtual() const { return cargaAtual; }
 
-    if (direcao == "D") novaColuna++;
-    else if (direcao == "E") novaColuna--;
-    else if (direcao == "C") novaLinha--;
-    else if (direcao == "B") novaLinha++;
-    else if (direcao == "CE") { novaLinha--; novaColuna--; }
-    else if (direcao == "CD") { novaLinha--; novaColuna++; }
-    else if (direcao == "BE") { novaLinha++; novaColuna--; }
-    else if (direcao == "BD") { novaLinha++; novaColuna++; }
-
-    moverNoMapa(mapa, novaLinha, novaColuna);
+void Caravana::moverPara(int novaLinha, int novaColuna) {
+    linha = novaLinha;
+    coluna = novaColuna;
 }
 
-void Caravana::moverNoMapa(Mapa* mapa, int novaLinha, int novaColuna) {
-    if (mapa->obterPosicao(novaLinha, novaColuna) == '.') {
-        mapa->atualizarPosicao(linha, coluna, '.');
-        linha = novaLinha;
-        coluna = novaColuna;
-        mapa->atualizarPosicao(linha, coluna, 'C');
+void Caravana::adicionarCarga(int quantidade) {
+    if (cargaAtual + quantidade <= capacidadeCarga) {
+        cargaAtual += quantidade;
     } else {
-        std::cout << "Movimento inválido: posição ocupada." << std::endl;
+        throw std::runtime_error("Capacidade de carga excedida.");
     }
 }
 
-void Caravana::imprimirInfo() const {
-    std::cout << "Tipo: " << tipo << ", Posição: (" << linha << ", " << coluna << ")";
-    std::cout << ", Capacidade de Carga: " << capacidadeCarga << ", Tripulação: " << tripulacao << ", Água: " << agua << ", Moedas: " << moedas << std::endl;
-}
-
-void Caravana::executarMovimentoAutonomo(Mapa* mapa) {
-    int novaColuna = coluna + 1;
-    if (novaColuna < mapa->getColunas() && mapa->obterPosicao(linha, novaColuna) == '.') {
-        moverNoMapa(mapa, linha, novaColuna);
+void Caravana::removerCarga(int quantidade) {
+    if (cargaAtual - quantidade >= 0) {
+        cargaAtual -= quantidade;
     } else {
-        std::cout << "Movimento automático bloqueado." << std::endl;
+        throw std::runtime_error("Carga insuficiente para remover.");
     }
 }
 
-void Caravana::ativarMovimentoAutomatico() {
-    movimentoAutomatico = true;
-}
-
-void Caravana::desativarMovimentoAutomatico() {
-    movimentoAutomatico = false;
-}
-
-bool Caravana::isMovimentoAutomatico() const {
-    return movimentoAutomatico;
-}
-
-void Caravana::sofrerDano(int dano) {
-    tripulacao -= dano;
-    if (tripulacao < 0) {
-        tripulacao = 0;
+void Caravana::consumirAgua(int quantidade) {
+    if (aguaAtual - quantidade >= 0) {
+        aguaAtual -= quantidade;
+    } else {
+        aguaAtual = 0;
+        throw std::runtime_error("Sem água suficiente.");
     }
-}
-
-bool Caravana::estaDestruida() const {
-    return tripulacao <= 0;
-}
-
-bool Caravana::estaAdjacente(Caravana* outra) const {
-    return (abs(linha - outra->getLinha()) <= 1) && (abs(coluna - outra->getColuna()) <= 1);
-}
-
-void Caravana::combater(Caravana* outra, Mapa* mapa) {
-    int dano = std::rand() % 10 + 1;
-    sofrerDano(dano);
-    outra->sofrerDano(dano);
-    std::cout << "Combate entre " << tipo << " e " << outra->getTipo() << ". Dano infligido: " << dano << std::endl;
-
-    if (estaDestruida()) {
-        std::cout << "A caravana do tipo " << tipo << " foi destruída!" << std::endl;
-        mapa->atualizarPosicao(linha, coluna, '.');
-    }
-
-    if (outra->estaDestruida()) {
-        std::cout << "A caravana do tipo " << outra->getTipo() << " foi destruída!" << std::endl;
-        mapa->atualizarPosicao(outra->getLinha(), outra->getColuna(), '.');
-    }
-}
-
-int Caravana::getLinha() const {
-    return linha;
-}
-
-int Caravana::getColuna() const {
-    return coluna;
-}
-
-std::string Caravana::getTipo() const {
-    return tipo;
 }
 
 void Caravana::adicionarTripulantes(int quantidade) {
-    tripulacao += quantidade;
-    if (tripulacao > capacidadeCarga) {
-        tripulacao = capacidadeCarga;
-    }
+    tripulantes += quantidade;
 }
 
 void Caravana::removerTripulantes(int quantidade) {
-    tripulacao -= quantidade;
-    if (tripulacao < 0) {
-        tripulacao = 0;
+    if (tripulantes - quantidade >= 0) {
+        tripulantes -= quantidade;
+    } else {
+        throw std::runtime_error("Tripulantes insuficientes.");
     }
 }
 
-void Caravana::adicionarMoedas(int quantidade) {
-    moedas += quantidade;
+// Implementação da CaravanaComercio
+CaravanaComercio::CaravanaComercio(int id, int linha, int coluna)
+        : Caravana(id, linha, coluna, 40, 200, 20) {}
+
+bool CaravanaComercio::estaSemAgua() const {
+    return aguaAtual <= 0;
 }
 
-int Caravana::getTripulacao() const {
-    return tripulacao;
+bool CaravanaComercio::estaCheia() const {
+    return cargaAtual >= capacidadeCarga;
 }
 
-int Caravana::getMoedas() const {
-    return moedas;
+void CaravanaComercio::executarComportamento(Mapa& mapa) {
+    // Lógica para mover-se próximo a outra caravana do utilizador
+    auto proximas = mapa.encontrarCaravanasAdjacentes(linha, coluna);
+    if (!proximas.empty()) {
+        auto [novaLinha, novaColuna] = proximas.front();
+        moverPara(novaLinha, novaColuna);
+        return;
+    }
+
+    // Lógica para itens próximos
+    auto itemProximo = mapa.encontrarItemProximo(linha, coluna, 2);
+    if (itemProximo) {
+        moverPara(itemProximo->linha, itemProximo->coluna);
+    }
 }
+
+
+
+// Implementação da CaravanaMilitar
+CaravanaMilitar::CaravanaMilitar(int id, int linha, int coluna)
+        : Caravana(id, linha, coluna, 5, 400, 40) {}
+
+bool CaravanaMilitar::estaSemAgua() const {
+    return aguaAtual <= 0;
+}
+
+bool CaravanaMilitar::estaCheia() const {
+    return cargaAtual >= capacidadeCarga;
+}
+
+void CaravanaMilitar::executarComportamento(Mapa& mapa) {
+    auto barbaroProximo = mapa.encontrarCaravanaBarbaraProxima(linha, coluna, 6);
+    if (barbaroProximo) {
+        moverPara(barbaroProximo->getLinha(), barbaroProximo->getColuna());
+    }
+}
+
+// Implementação da CaravanaSecreta
+CaravanaSecreta::CaravanaSecreta(int id, int linha, int coluna)
+        : Caravana(id, linha, coluna, 20, 300, 30) {}
+
+bool CaravanaSecreta::estaSemAgua() const {
+    return aguaAtual <= 0;
+}
+
+bool CaravanaSecreta::estaCheia() const {
+    return cargaAtual >= capacidadeCarga;
+}
+
+void CaravanaSecreta::executarComportamento(Mapa& mapa) {
+    // Comportamento único: movimentação aleatória
+    auto novaPosicao = mapa.gerarMovimentoAleatorio(linha, coluna);
+    moverPara(novaPosicao.first, novaPosicao.second);
+}
+
+
+

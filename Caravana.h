@@ -3,41 +3,77 @@
 #define TP_POO_2425_CARAVANA_H
 
 #include <string>
-#include "Mapa.h"
+#include <iostream>
 
+class Mapa;
+
+// Classe base abstrata para caravanas
 class Caravana {
 protected:
+    int id;
     int linha;
     int coluna;
     int capacidadeCarga;
-    int tripulacao;
-    int agua;
-    int moedas;
-    std::string tipo;
-    bool movimentoAutomatico;
+    int capacidadeAgua;
+    int tripulantes;
+    int aguaAtual;
+    int cargaAtual;
 
 public:
-    Caravana(int linha, int coluna, int capacidadeCarga, int tripulacao, int agua, const std::string& tipo);
-    void mover(const std::string& direcao, Mapa* mapa);
-    void moverNoMapa(Mapa* mapa, int novaLinha, int novaColuna);
-    void imprimirInfo() const;
-    void executarMovimentoAutonomo(Mapa* mapa);
-    void ativarMovimentoAutomatico();
-    void desativarMovimentoAutomatico();
-    bool isMovimentoAutomatico() const;
-    void sofrerDano(int dano);
-    bool estaDestruida() const;
-    bool estaAdjacente(Caravana* outra) const;
-    void combater(Caravana* outra, Mapa* mapa);
+    Caravana(int id, int linha, int coluna, int capacidadeCarga, int capacidadeAgua, int tripulantesInicial);
+    virtual ~Caravana() = default;
+
+    // Métodos de acesso
+    int getId() const;
     int getLinha() const;
     int getColuna() const;
-    std::string getTipo() const;
+    int getCapacidadeCarga() const;
+    int getCapacidadeAgua() const;
+    int getTripulantes() const;
+    int getAguaAtual() const;
+    int getCargaAtual() const;
+    virtual std::string getTipo() const = 0;
 
+    // Métodos de modificação
+    void moverPara(int novaLinha, int novaColuna);
+    void adicionarCarga(int quantidade);
+    void removerCarga(int quantidade);
+    void consumirAgua(int quantidade);
     void adicionarTripulantes(int quantidade);
     void removerTripulantes(int quantidade);
-    void adicionarMoedas(int quantidade);
-    int getTripulacao() const;
-    int getMoedas() const;
+
+    // Métodos abstratos para polimorfismo
+    virtual bool estaSemAgua() const = 0;
+    virtual bool estaCheia() const = 0;
+    virtual void executarComportamento(Mapa& mapa) = 0;
 };
 
-#endif //TP_POO_2425_CARAVANA_H
+// Classes derivadas
+class CaravanaComercio : public Caravana {
+public:
+    CaravanaComercio(int id, int linha, int coluna);
+    bool estaSemAgua() const override;
+    bool estaCheia() const override;
+    void executarComportamento(Mapa& mapa) override;
+    std::string getTipo() const override { return "Comercio"; }
+};
+
+class CaravanaMilitar : public Caravana {
+public:
+    CaravanaMilitar(int id, int linha, int coluna);
+    bool estaSemAgua() const override;
+    bool estaCheia() const override;
+    void executarComportamento(Mapa& mapa) override;
+    std::string getTipo() const override { return "Militar"; }
+};
+
+class CaravanaSecreta : public Caravana {
+public:
+    CaravanaSecreta(int id, int linha, int coluna);
+    bool estaSemAgua() const override;
+    bool estaCheia() const override;
+    void executarComportamento(Mapa& mapa) override;
+    std::string getTipo() const override { return "Secreta"; }
+};
+
+#endif // TP_POO_2425_CARAVANA_H

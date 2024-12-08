@@ -1,6 +1,5 @@
-// Buffer.cpp
+// Alterações no ficheiro Buffer.cpp
 #include "Buffer.h"
-#include <iostream>
 #include <cstring>
 
 Buffer::Buffer(int linhas, int colunas) : linhas(linhas), colunas(colunas), cursorLinha(0), cursorColuna(0) {
@@ -20,6 +19,8 @@ void Buffer::moverCursor(int linha, int coluna) {
     if (linha >= 0 && linha < linhas && coluna >= 0 && coluna < colunas) {
         cursorLinha = linha;
         cursorColuna = coluna;
+    } else {
+        throw std::out_of_range("Coordenadas do cursor fora do limite do buffer.");
     }
 }
 
@@ -44,4 +45,18 @@ void Buffer::imprimirBuffer() const {
         }
         std::cout << std::endl;
     }
+}
+
+Buffer& Buffer::operator<<(const char* str) {
+    if (str) {
+        while (*str) {
+            escreverCaractere(*str++);
+        }
+    }
+    return *this;
+}
+
+Buffer& Buffer::operator<<(char c) {
+    escreverCaractere(c);
+    return *this;
 }
