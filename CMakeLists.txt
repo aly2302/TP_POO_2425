@@ -10,8 +10,7 @@ add_executable(TP_POO_2425 main.cpp
         Mapa.cpp
         Caravana.cpp
         Caravana.h
-        Comandos.cpp
-        Comandos.h
         Item.cpp
         Item.h
+        Cidade.h
 )
