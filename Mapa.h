@@ -11,13 +11,12 @@
 
 class Mapa {
 private:
-    // Atributos do mapa
     int linhas;
     int colunas;
     char* grid;
-    Buffer* buffer; // Ponteiro para o buffer para exibição
+    Buffer* buffer;
 
-    // Parâmetros configuráveis
+    // Parâmetros adicionais
     int moedas;
     int instantesEntreNovosItens;
     int duracaoItem;
@@ -28,38 +27,26 @@ private:
     int instantesEntreNovosBarbaros;
     int duracaoBarbaros;
 
-    // Listas de entidades
     std::vector<std::unique_ptr<Caravana>> caravanas;
     std::vector<Item> itens;
     std::vector<Cidade> cidades;
 
-    // Métodos auxiliares
     int calcularIndice(int linha, int coluna) const;
     bool posicaoValida(int linha, int coluna) const;
 
 public:
-    // Construtor e destrutor
+    // Construtor
     Mapa(const std::string& nomeFicheiro, Buffer* buffer);
     ~Mapa();
 
-    // Métodos de acesso a parâmetros configuráveis
-    int getMoedas() const;
-    int getInstantesEntreNovosItens() const;
-    int getDuracaoItem() const;
-    int getMaxItens() const;
-    int getPrecoVendaMercadoria() const;
-    int getPrecoCompraMercadoria() const;
-    int getPrecoCaravana() const;
-    int getInstantesEntreNovosBarbaros() const;
-    int getDuracaoBarbaros() const;
+    // Acesso a parâmetros
+    int getMoedas() const { return moedas; }
+    int getPrecoCaravana() const { return precoCaravana; }
     int getNumeroCaravanas() const;
-    bool reduzirMoedas(int quantidade);
-
 
     // Gerenciamento do grid
     void atualizarGrid(int linha, int coluna, char simbolo);
     char obterGrid(int linha, int coluna) const;
-    void imprimirMapa() const;
 
     // Gerenciamento de caravanas
     void adicionarCaravana(std::unique_ptr<Caravana> caravana);
@@ -68,21 +55,26 @@ public:
     Caravana* encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio) const;
 
     // Gerenciamento de itens
-    void adicionarItem(const Item& item);
+    void adicionarItem(int linha, int coluna);
     Item* encontrarItemProximo(int linha, int coluna, int raio) const;
+
+    std::pair<int, int> gerarMovimentoAleatorio(int linha, int coluna) const;
+
 
     // Gerenciamento de cidades
     void adicionarCidade(const Cidade& cidade);
     void listarCidades() const;
 
-    // Lógica de simulação
-    void executarSimulacao();
-    bool resolverCombates(int& combatesVencidos);
-
-    // Métodos auxiliares
+    // Auxiliares
     bool estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const;
-    bool simularCombate(Caravana& jogador, Caravana& barbara);
-    std::pair<int, int> gerarMovimentoAleatorio(int linha, int coluna) const;
+    bool reduzirMoedas(int quantidade);
+    int gerarIDCaravana();
+
+    // Simulação
+    void executarSimulacao();
+
+    // Imprimir estado do mapa
+    void imprimirMapa() const;
 };
 
 #endif // TP_POO_2425_MAPA_H

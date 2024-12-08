@@ -1,9 +1,8 @@
-// Caravana.cpp
 #include "Caravana.h"
 #include "Mapa.h"
 #include <stdexcept>
 
-// Implementação da classe base Caravana
+// Base Caravana implementation
 Caravana::Caravana(int id, int linha, int coluna, int capacidadeCarga, int capacidadeAgua, int tripulantesInicial)
         : id(id), linha(linha), coluna(coluna), capacidadeCarga(capacidadeCarga), capacidadeAgua(capacidadeAgua),
           tripulantes(tripulantesInicial), aguaAtual(capacidadeAgua), cargaAtual(0) {}
@@ -59,20 +58,15 @@ void Caravana::removerTripulantes(int quantidade) {
     }
 }
 
-// Implementação da CaravanaComercio
+// CaravanaComercio
 CaravanaComercio::CaravanaComercio(int id, int linha, int coluna)
         : Caravana(id, linha, coluna, 40, 200, 20) {}
 
-bool CaravanaComercio::estaSemAgua() const {
-    return aguaAtual <= 0;
-}
-
-bool CaravanaComercio::estaCheia() const {
-    return cargaAtual >= capacidadeCarga;
-}
+bool CaravanaComercio::estaSemAgua() const { return aguaAtual <= 0; }
+bool CaravanaComercio::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
 void CaravanaComercio::executarComportamento(Mapa& mapa) {
-    // Lógica para mover-se próximo a outra caravana do utilizador
+    // Look for adjacent caravans
     auto proximas = mapa.encontrarCaravanasAdjacentes(linha, coluna);
     if (!proximas.empty()) {
         auto [novaLinha, novaColuna] = proximas.front();
@@ -80,26 +74,19 @@ void CaravanaComercio::executarComportamento(Mapa& mapa) {
         return;
     }
 
-    // Lógica para itens próximos
+    // Look for nearby items
     auto itemProximo = mapa.encontrarItemProximo(linha, coluna, 2);
     if (itemProximo) {
         moverPara(itemProximo->linha, itemProximo->coluna);
     }
 }
 
-
-
-// Implementação da CaravanaMilitar
+// CaravanaMilitar
 CaravanaMilitar::CaravanaMilitar(int id, int linha, int coluna)
         : Caravana(id, linha, coluna, 5, 400, 40) {}
 
-bool CaravanaMilitar::estaSemAgua() const {
-    return aguaAtual <= 0;
-}
-
-bool CaravanaMilitar::estaCheia() const {
-    return cargaAtual >= capacidadeCarga;
-}
+bool CaravanaMilitar::estaSemAgua() const { return aguaAtual <= 0; }
+bool CaravanaMilitar::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
 void CaravanaMilitar::executarComportamento(Mapa& mapa) {
     auto barbaroProximo = mapa.encontrarCaravanaBarbaraProxima(linha, coluna, 6);
@@ -108,23 +95,25 @@ void CaravanaMilitar::executarComportamento(Mapa& mapa) {
     }
 }
 
-// Implementação da CaravanaSecreta
+// CaravanaSecreta
 CaravanaSecreta::CaravanaSecreta(int id, int linha, int coluna)
         : Caravana(id, linha, coluna, 20, 300, 30) {}
 
-bool CaravanaSecreta::estaSemAgua() const {
-    return aguaAtual <= 0;
-}
-
-bool CaravanaSecreta::estaCheia() const {
-    return cargaAtual >= capacidadeCarga;
-}
+bool CaravanaSecreta::estaSemAgua() const { return aguaAtual <= 0; }
+bool CaravanaSecreta::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
 void CaravanaSecreta::executarComportamento(Mapa& mapa) {
-    // Comportamento único: movimentação aleatória
-    auto novaPosicao = mapa.gerarMovimentoAleatorio(linha, coluna);
-    moverPara(novaPosicao.first, novaPosicao.second);
+    auto novaPos = mapa.gerarMovimentoAleatorio(linha, coluna);
+    moverPara(novaPos.first, novaPos.second);
 }
 
+// CaravanaBarbara
+CaravanaBarbara::CaravanaBarbara(int id, int linha, int coluna)
+        : Caravana(id, linha, coluna, 0, 0, 10) {}
 
-
+void CaravanaBarbara::executarComportamento(Mapa& mapa) {
+    auto novaPos = mapa.gerarMovimentoAleatorio(linha, coluna);
+    moverPara(novaPos.first, novaPos.second);
+    std::cout << "Caravana Barbara " << getId() << " moveu-se para ("
+              << novaPos.first << ", " << novaPos.second << ").\n";
+}

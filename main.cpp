@@ -18,28 +18,14 @@ void exibirMenu() {
     std::cout << "9. Sair" << std::endl;
 }
 
-int gerarIDCaravana() {
-    static int idAtual = 0;
-    return ++idAtual;
-}
-
 int main() {
     try {
         Buffer buffer(10, 20); // Inicializar o buffer com dimensões apropriadas
         Mapa mapa("config.txt", &buffer); // Passar o buffer ao mapa
 
-        int moedas = mapa.getMoedas(); // Inicializar moedas do jogador
-        int instantes = 0;             // Contador de instantes
-        int combatesVencidos = 0;      // Contador de combates vencidos
-
         bool executando = true;
 
         while (executando) {
-            if (moedas <= 0 && mapa.getNumeroCaravanas() == 0) {
-                std::cout << "Você ficou sem moedas e sem caravanas. Fim da simulação!" << std::endl;
-                break;
-            }
-
             exibirMenu();
             int comando;
             std::cout << "Escolha um comando: ";
@@ -48,45 +34,50 @@ int main() {
             switch (comando) {
                 case 1: {
                     int linha, coluna;
-                    std::cout << "Informe a posição inicial (linha coluna): ";
-                    std::cin >> linha >> coluna;
-                    int id = gerarIDCaravana();
-                    try {
-                        mapa.adicionarCaravana(std::make_unique<CaravanaComercio>(id, linha, coluna));
-                    } catch (const std::exception& e) {
-                        std::cerr << e.what() << std::endl;
-                    }
-                    mapa.imprimirMapa(); // Exibir o mapa atualizado
-                    break;
-                }
-
-                case 2: {
-                    int linha, coluna, custo = mapa.getPrecoCaravana();
-                    if (moedas >= custo) {
+                    if (mapa.reduzirMoedas(mapa.getPrecoCaravana())) {
                         std::cout << "Informe a posição inicial (linha coluna): ";
                         std::cin >> linha >> coluna;
-                        int id = gerarIDCaravana();
-                        mapa.adicionarCaravana(std::make_unique<CaravanaMilitar>(id, linha, coluna));
-                        moedas -= custo;
-                        std::cout << "Caravana militar criada com sucesso! ID: " << id << std::endl;
-                        std::cout << "Moedas restantes: " << moedas << std::endl;
-                        mapa.imprimirMapa(); // Exibir o mapa atualizado
+                        int id = mapa.gerarIDCaravana();
+                        try {
+                            mapa.adicionarCaravana(std::make_unique<CaravanaComercio>(id, linha, coluna));
+                            std::cout << "Caravana do tipo Comércio adicionada na posição (" << linha << ", " << coluna << ")." << std::endl;
+                        } catch (const std::exception& e) {
+                            std::cerr << e.what() << std::endl;
+                        }
+                    } else {
+                        std::cout << "Moedas insuficientes para criar uma caravana!" << std::endl;
+                    }
+                    break;
+                }
+                case 2: {
+                    int linha, coluna;
+                    if (mapa.reduzirMoedas(mapa.getPrecoCaravana())) {
+                        std::cout << "Informe a posição inicial (linha coluna): ";
+                        std::cin >> linha >> coluna;
+                        int id = mapa.gerarIDCaravana();
+                        try {
+                            mapa.adicionarCaravana(std::make_unique<CaravanaMilitar>(id, linha, coluna));
+                            std::cout << "Caravana do tipo Militar adicionada na posição (" << linha << ", " << coluna << ")." << std::endl;
+                        } catch (const std::exception& e) {
+                            std::cerr << e.what() << std::endl;
+                        }
                     } else {
                         std::cout << "Moedas insuficientes para criar uma caravana!" << std::endl;
                     }
                     break;
                 }
                 case 3: {
-                    int linha, coluna, custo = mapa.getPrecoCaravana();
-                    if (moedas >= custo) {
+                    int linha, coluna;
+                    if (mapa.reduzirMoedas(mapa.getPrecoCaravana())) {
                         std::cout << "Informe a posição inicial (linha coluna): ";
                         std::cin >> linha >> coluna;
-                        int id = gerarIDCaravana();
-                        mapa.adicionarCaravana(std::make_unique<CaravanaSecreta>(id, linha, coluna));
-                        moedas -= custo;
-                        std::cout << "Caravana secreta criada com sucesso! ID: " << id << std::endl;
-                        std::cout << "Moedas restantes: " << moedas << std::endl;
-                        mapa.imprimirMapa(); // Exibir o mapa atualizado
+                        int id = mapa.gerarIDCaravana();
+                        try {
+                            mapa.adicionarCaravana(std::make_unique<CaravanaSecreta>(id, linha, coluna));
+                            std::cout << "Caravana do tipo Secreta adicionada na posição (" << linha << ", " << coluna << ")." << std::endl;
+                        } catch (const std::exception& e) {
+                            std::cerr << e.what() << std::endl;
+                        }
                     } else {
                         std::cout << "Moedas insuficientes para criar uma caravana!" << std::endl;
                     }
@@ -115,15 +106,7 @@ int main() {
                     break;
                 case 7:
                     std::cout << "Executando simulação..." << std::endl;
-                    for (int i = 0; i < 5; ++i) {
-                        mapa.executarSimulacao();
-                        instantes++;
-                        /*
-                        if (mapa.resolverCombates(combatesVencidos)) {
-                            std::cout << "Combate resolvido!" << std::endl;
-                        }
-                         */
-                    }
+                    mapa.executarSimulacao();
                     std::cout << "Simulação concluída." << std::endl;
                     break;
                 case 8: {
@@ -153,11 +136,7 @@ int main() {
             }
         }
 
-        std::cout << "Resumo Final:\n";
-        std::cout << "Instantes decorridos: " << instantes << std::endl;
-        std::cout << "Combates vencidos: " << combatesVencidos << std::endl;
-        std::cout << "Moedas restantes: " << moedas << std::endl;
-
+        std::cout << "Fim do programa." << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Erro: " << e.what() << std::endl;
         return 1;
