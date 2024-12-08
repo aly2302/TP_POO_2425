@@ -1,10 +1,9 @@
 #include "Mapa.h"
 #include "Caravana.h"
+#include "Buffer.h"
 #include <iostream>
 #include <memory>
 #include <string>
-#include <thread>
-#include <chrono>
 
 void exibirMenu() {
     std::cout << "\nComandos disponíveis:" << std::endl;
@@ -14,21 +13,33 @@ void exibirMenu() {
     std::cout << "4. Mover caravana" << std::endl;
     std::cout << "5. Listar cidades" << std::endl;
     std::cout << "6. Exibir mapa" << std::endl;
-    std::cout << "7. Iniciar simulação" << std::endl;
-    std::cout << "8. Pausar simulação" << std::endl;
+    std::cout << "7. Executar simulação" << std::endl;
+    std::cout << "8. Adicionar cidade" << std::endl;
     std::cout << "9. Sair" << std::endl;
+}
+
+int gerarIDCaravana() {
+    static int idAtual = 0;
+    return ++idAtual;
 }
 
 int main() {
     try {
-        // Inicializar o mapa
-        Mapa mapa("config.txt");
+        Buffer buffer(10, 20); // Inicializar o buffer com dimensões apropriadas
+        Mapa mapa("config.txt", &buffer); // Passar o buffer ao mapa
+
+        int moedas = mapa.getMoedas(); // Inicializar moedas do jogador
+        int instantes = 0;             // Contador de instantes
+        int combatesVencidos = 0;      // Contador de combates vencidos
 
         bool executando = true;
-        bool simulacaoAtiva = false;
-        std::thread simulacaoThread;
 
         while (executando) {
+            if (moedas <= 0 && mapa.getNumeroCaravanas() == 0) {
+                std::cout << "Você ficou sem moedas e sem caravanas. Fim da simulação!" << std::endl;
+                break;
+            }
+
             exibirMenu();
             int comando;
             std::cout << "Escolha um comando: ";
@@ -39,27 +50,46 @@ int main() {
                     int linha, coluna;
                     std::cout << "Informe a posição inicial (linha coluna): ";
                     std::cin >> linha >> coluna;
-                    mapa.adicionarCaravana(std::make_unique<CaravanaComercio>(1, linha, coluna));
-                    std::cout << "Caravana de comércio criada com sucesso!" << std::endl;
+                    int id = gerarIDCaravana();
+                    try {
+                        mapa.adicionarCaravana(std::make_unique<CaravanaComercio>(id, linha, coluna));
+                    } catch (const std::exception& e) {
+                        std::cerr << e.what() << std::endl;
+                    }
                     mapa.imprimirMapa(); // Exibir o mapa atualizado
                     break;
                 }
+
                 case 2: {
-                    int linha, coluna;
-                    std::cout << "Informe a posição inicial (linha coluna): ";
-                    std::cin >> linha >> coluna;
-                    mapa.adicionarCaravana(std::make_unique<CaravanaMilitar>(2, linha, coluna));
-                    std::cout << "Caravana militar criada com sucesso!" << std::endl;
-                    mapa.imprimirMapa(); // Exibir o mapa atualizado
+                    int linha, coluna, custo = mapa.getPrecoCaravana();
+                    if (moedas >= custo) {
+                        std::cout << "Informe a posição inicial (linha coluna): ";
+                        std::cin >> linha >> coluna;
+                        int id = gerarIDCaravana();
+                        mapa.adicionarCaravana(std::make_unique<CaravanaMilitar>(id, linha, coluna));
+                        moedas -= custo;
+                        std::cout << "Caravana militar criada com sucesso! ID: " << id << std::endl;
+                        std::cout << "Moedas restantes: " << moedas << std::endl;
+                        mapa.imprimirMapa(); // Exibir o mapa atualizado
+                    } else {
+                        std::cout << "Moedas insuficientes para criar uma caravana!" << std::endl;
+                    }
                     break;
                 }
                 case 3: {
-                    int linha, coluna;
-                    std::cout << "Informe a posição inicial (linha coluna): ";
-                    std::cin >> linha >> coluna;
-                    mapa.adicionarCaravana(std::make_unique<CaravanaSecreta>(3, linha, coluna));
-                    std::cout << "Caravana secreta criada com sucesso!" << std::endl;
-                    mapa.imprimirMapa(); // Exibir o mapa atualizado
+                    int linha, coluna, custo = mapa.getPrecoCaravana();
+                    if (moedas >= custo) {
+                        std::cout << "Informe a posição inicial (linha coluna): ";
+                        std::cin >> linha >> coluna;
+                        int id = gerarIDCaravana();
+                        mapa.adicionarCaravana(std::make_unique<CaravanaSecreta>(id, linha, coluna));
+                        moedas -= custo;
+                        std::cout << "Caravana secreta criada com sucesso! ID: " << id << std::endl;
+                        std::cout << "Moedas restantes: " << moedas << std::endl;
+                        mapa.imprimirMapa(); // Exibir o mapa atualizado
+                    } else {
+                        std::cout << "Moedas insuficientes para criar uma caravana!" << std::endl;
+                    }
                     break;
                 }
                 case 4: {
@@ -84,45 +114,50 @@ int main() {
                     mapa.imprimirMapa();
                     break;
                 case 7:
-                    if (!simulacaoAtiva) {
-                        simulacaoAtiva = true;
-                        std::cout << "Iniciando simulação..." << std::endl;
-                        simulacaoThread = std::thread([&]() {
-                            while (simulacaoAtiva) {
-                                mapa.executarSimulacao();
-                                std::this_thread::sleep_for(std::chrono::seconds(1));
-                            }
-                        });
-                    } else {
-                        std::cout << "Simulação já está ativa!" << std::endl;
-                    }
-                    break;
-                case 8:
-                    if (simulacaoAtiva) {
-                        simulacaoAtiva = false;
-                        if (simulacaoThread.joinable()) {
-                            simulacaoThread.join();
+                    std::cout << "Executando simulação..." << std::endl;
+                    for (int i = 0; i < 5; ++i) {
+                        mapa.executarSimulacao();
+                        instantes++;
+                        /*
+                        if (mapa.resolverCombates(combatesVencidos)) {
+                            std::cout << "Combate resolvido!" << std::endl;
                         }
-                        std::cout << "Simulação pausada." << std::endl;
-                    } else {
-                        std::cout << "A simulação não está ativa." << std::endl;
+                         */
+                    }
+                    std::cout << "Simulação concluída." << std::endl;
+                    break;
+                case 8: {
+                    int linha, coluna;
+                    std::string nome;
+                    std::cout << "Informe a posição da cidade (linha coluna): ";
+                    std::cin >> linha >> coluna;
+                    std::cout << "Informe o nome da cidade: ";
+                    std::cin.ignore(); // Ignorar o \n restante
+                    std::getline(std::cin, nome);
+                    try {
+                        mapa.adicionarCidade(Cidade(nome, linha, coluna));
+                        std::cout << "Cidade \"" << nome << "\" adicionada com sucesso!" << std::endl;
+                        mapa.imprimirMapa(); // Exibir o mapa atualizado
+                    } catch (const std::exception& e) {
+                        std::cerr << "Erro ao adicionar cidade: " << e.what() << std::endl;
                     }
                     break;
+                }
                 case 9:
                     std::cout << "Encerrando o programa..." << std::endl;
                     executando = false;
-                    if (simulacaoAtiva) {
-                        simulacaoAtiva = false;
-                        if (simulacaoThread.joinable()) {
-                            simulacaoThread.join();
-                        }
-                    }
                     break;
                 default:
                     std::cout << "Comando inválido!" << std::endl;
                     break;
             }
         }
+
+        std::cout << "Resumo Final:\n";
+        std::cout << "Instantes decorridos: " << instantes << std::endl;
+        std::cout << "Combates vencidos: " << combatesVencidos << std::endl;
+        std::cout << "Moedas restantes: " << moedas << std::endl;
+
     } catch (const std::exception& e) {
         std::cerr << "Erro: " << e.what() << std::endl;
         return 1;

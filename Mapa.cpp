@@ -7,43 +7,61 @@
 #include <ctime>
 #include <cmath>
 
-Mapa::Mapa(const std::string& nomeFicheiro) {
+Mapa::Mapa(const std::string& nomeFicheiro, Buffer* buffer) : buffer(buffer) {
     std::ifstream ficheiro(nomeFicheiro);
     if (!ficheiro.is_open()) {
         throw std::runtime_error("Erro ao abrir o ficheiro do mapa.");
     }
 
-    // Ler dimensões do mapa
-    ficheiro >> linhas >> colunas;
-    ficheiro.ignore(); // Ignorar nova linha após as dimensões
+    try {
+        // Ler dimensões do mapa
+        ficheiro >> linhas >> colunas;
+        ficheiro.ignore();
 
-    // Inicializar o grid
-    grid = new char[linhas * colunas];
-    for (int i = 0; i < linhas; ++i) {
-        std::string linha;
-        std::getline(ficheiro, linha);
-        if (linha.length() != colunas) {
-            throw std::runtime_error("Erro: Linha do mapa com tamanho inválido.");
+        // Inicializar o grid
+        grid = new char[linhas * colunas];
+        for (int i = 0; i < linhas; ++i) {
+            std::string linha;
+            std::getline(ficheiro, linha);
+            if (linha.size() != static_cast<size_t>(colunas)) {
+                throw std::runtime_error("Linha do grid não corresponde ao número de colunas.");
+            }
+            for (int j = 0; j < colunas; ++j) {
+                grid[i * colunas + j] = linha[j];
+            }
         }
-        for (int j = 0; j < colunas; ++j) {
-            grid[i * colunas + j] = linha[j];
-        }
+
+        // Ler parâmetros adicionais
+        std::string str1;
+        ficheiro >> str1 >> moedas;
+        ficheiro >> str1 >> instantesEntreNovosItens;
+        ficheiro >> str1 >> duracaoItem;
+        ficheiro >> str1 >> maxItens;
+        ficheiro >> str1 >> precoVendaMercadoria;
+        ficheiro >> str1 >> precoCompraMercadoria;
+        ficheiro >> str1 >> precoCaravana;
+        ficheiro >> str1 >> instantesEntreNovosBarbaros;
+        ficheiro >> str1 >> duracaoBarbaros;
+
+        std::srand(std::time(nullptr)); // Inicializa o gerador de números aleatórios
+
+        // Depuração
+        std::cout << "Configuração carregada com sucesso:\n"
+                  << "Linhas: " << linhas << ", Colunas: " << colunas << "\n"
+                  << "Moedas: " << moedas << "\n"
+                  << "Instantes entre novos itens: " << instantesEntreNovosItens << "\n"
+                  << "Duração do item: " << duracaoItem << "\n"
+                  << "Máximo de itens: " << maxItens << "\n"
+                  << "Preço de venda: " << precoVendaMercadoria << "\n"
+                  << "Preço de compra: " << precoCompraMercadoria << "\n"
+                  << "Preço de caravana: " << precoCaravana << "\n"
+                  << "Instantes entre bárbaros: " << instantesEntreNovosBarbaros << "\n"
+                  << "Duração dos bárbaros: " << duracaoBarbaros << std::endl;
+
+        ficheiro.close();
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Erro ao ler o ficheiro: ") + e.what());
     }
-
-    // Ler parâmetros adicionais
-    ficheiro >> moedas;
-    ficheiro >> instantesEntreNovosItens;
-    ficheiro >> duracaoItem;
-    ficheiro >> maxItens;
-    ficheiro >> precoVendaMercadoria;
-    ficheiro >> precoCompraMercadoria;
-    ficheiro >> precoCaravana;
-    ficheiro >> instantesEntreNovosBarbaros;
-    ficheiro >> duracaoBarbaros;
-
-    ficheiro.close();
-
-    std::srand(std::time(nullptr)); // Inicializa o gerador de números aleatórios
 }
 
 Mapa::~Mapa() {
@@ -52,6 +70,10 @@ Mapa::~Mapa() {
 
 int Mapa::calcularIndice(int linha, int coluna) const {
     return linha * colunas + coluna;
+}
+
+int Mapa::getNumeroCaravanas() const {
+    return caravanas.size();
 }
 
 bool Mapa::posicaoValida(int linha, int coluna) const {
@@ -81,11 +103,26 @@ void Mapa::imprimirMapa() const {
     }
 }
 
+bool Mapa::reduzirMoedas(int quantidade) {
+    if (moedas >= quantidade) {
+        moedas -= quantidade;
+        return true;
+    }
+    return false;
+}
+
 
 void Mapa::adicionarCaravana(std::unique_ptr<Caravana> caravana) {
+    if (moedas < precoCaravana) {
+        throw std::runtime_error("Moedas insuficientes para criar uma nova caravana.");
+    }
+
     if (!posicaoValida(caravana->getLinha(), caravana->getColuna())) {
         throw std::out_of_range("Posição inválida para adicionar a caravana.");
     }
+
+    // Reduzir moedas e registrar a nova caravana
+    moedas -= precoCaravana;
 
     char simbolo = 'C'; // Padrão: Comércio
     if (caravana->getTipo() == "Militar") {
@@ -98,10 +135,12 @@ void Mapa::adicionarCaravana(std::unique_ptr<Caravana> caravana) {
     std::cout << "Caravana do tipo " << caravana->getTipo()
               << " adicionada na posição ("
               << caravana->getLinha() << ", "
-              << caravana->getColuna() << ")." << std::endl;
+              << caravana->getColuna() << "). Moedas restantes: " << moedas << std::endl;
 
     caravanas.push_back(std::move(caravana));
 }
+
+
 
 
 void Mapa::moverCaravana(int id, int novaLinha, int novaColuna) {
@@ -147,17 +186,103 @@ void Mapa::listarCidades() const {
     }
 }
 
+bool Mapa::estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const {
+    return (linha1 == linha2 && std::abs(coluna1 - coluna2) == 1) || // Mesma linha, colunas adjacentes
+           (coluna1 == coluna2 && std::abs(linha1 - linha2) == 1);   // Mesma coluna, linhas adjacentes
+}
+
+
 std::vector<std::pair<int, int>> Mapa::encontrarCaravanasAdjacentes(int linha, int coluna) const {
     std::vector<std::pair<int, int>> proximas;
     for (const auto& caravana : caravanas) {
-        int distLinha = std::abs(caravana->getLinha() - linha);
-        int distColuna = std::abs(caravana->getColuna() - coluna);
-        if ((distLinha + distColuna) == 1) { // Apenas adjacência direta
+        if (estaAdjacente(caravana->getLinha(), caravana->getColuna(), linha, coluna)) {
             proximas.emplace_back(caravana->getLinha(), caravana->getColuna());
         }
     }
     return proximas;
 }
+
+int Mapa::getMoedas() const {
+    return moedas;
+}
+
+int Mapa::getPrecoCaravana() const {
+    return precoCaravana;
+}
+
+/*
+bool Mapa::simularCombate(Caravana& caravana1, Caravana& caravana2) {
+    // Verifica se uma das caravanas é do tipo "Barbara"
+    if (caravana1.getTipo() == "Barbara" || caravana2.getTipo() == "Barbara") {
+        // Simula combate: destrói a caravana "não bárbara" ou a "bárbara"
+        if (caravana1.getTipo() == "Barbara") {
+            std::cout << "Caravana Bárbara atacou a Caravana ID " << caravana2.getId() << ".\n";
+            return true; // Caravana2 foi destruída
+        } else {
+            std::cout << "Caravana Bárbara atacada pela Caravana ID " << caravana1.getId() << ".\n";
+            return false; // Caravana1 foi destruída
+        }
+    }
+
+    // Se ambas forem do mesmo tipo ou não forem bárbaras, não há combate.
+    std::cout << "Interação sem combate entre as caravanas " << caravana1.getId()
+              << " e " << caravana2.getId() << ".\n";
+    return false;
+}
+
+
+bool Mapa::resolverCombates(int& combatesVencidos) {
+    bool houveCombate = false;
+
+    for (size_t i = 0; i < caravanas.size(); ++i) {
+        for (size_t j = i + 1; j < caravanas.size(); ++j) {
+            auto& caravana1 = caravanas[i];
+            auto& caravana2 = caravanas[j];
+
+            // Verifica se há uma caravana bárbara adjacente a uma do jogador
+            if ((caravana1->getTipo() == "Barbara" || caravana2->getTipo() == "Barbara") &&
+                estaAdjacente(caravana1->getLinha(), caravana1->getColuna(),
+                              caravana2->getLinha(), caravana2->getColuna())) {
+                houveCombate = true;
+
+                // Decide o resultado do combate
+                if (caravana1->getTipo() == "Barbara") {
+                    if (simularCombate(*caravana2, *caravana1)) {
+                        combatesVencidos++;
+                        std::cout << "Caravana " << caravana2->getId() << " venceu o combate contra Bárbara "
+                                  << caravana1->getId() << "!\n";
+                        caravanas.erase(caravanas.begin() + i);
+                        i--; // Reajusta índice após remoção
+                        break; // Interrompe para evitar acessar ponteiros inválidos
+                    } else {
+                        std::cout << "Caravana Bárbara " << caravana1->getId() << " destruiu Caravana "
+                                  << caravana2->getId() << ".\n";
+                        caravanas.erase(caravanas.begin() + j);
+                        j--; // Reajusta índice após remoção
+                    }
+                } else {
+                    if (simularCombate(*caravana1, *caravana2)) {
+                        combatesVencidos++;
+                        std::cout << "Caravana " << caravana1->getId() << " venceu o combate contra Bárbara "
+                                  << caravana2->getId() << "!\n";
+                        caravanas.erase(caravanas.begin() + j);
+                        j--; // Reajusta índice após remoção
+                    } else {
+                        std::cout << "Caravana Bárbara " << caravana2->getId() << " destruiu Caravana "
+                                  << caravana1->getId() << ".\n";
+                        caravanas.erase(caravanas.begin() + i);
+                        i--; // Reajusta índice após remoção
+                        break; // Interrompe para evitar acessar ponteiros inválidos
+                    }
+                }
+            }
+        }
+    }
+
+    return houveCombate;
+}
+*/
+
 
 Caravana* Mapa::encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio) const {
     for (const auto& caravana : caravanas) {
@@ -210,27 +335,24 @@ void Mapa::executarSimulacao() {
         }
     }
 
-    // Geração de novos itens
-    if (itens.size() < static_cast<size_t>(maxItens)) {
-        int novaLinha = std::rand() % linhas;
-        int novaColuna = std::rand() % colunas;
-        if (obterGrid(novaLinha, novaColuna) == '.') {
-            adicionarItem({novaLinha, novaColuna, 'I'});
-            atualizarGrid(novaLinha, novaColuna, 'I');
-            std::cout << "Novo item gerado em (" << novaLinha << ", " << novaColuna << ")." << std::endl;
-            houveMudanca = true;
-        }
-    }
+    // Verificar interações entre caravanas na mesma posição
+    for (size_t i = 0; i < caravanas.size(); ++i) {
+        for (size_t j = i + 1; j < caravanas.size(); ++j) {
+            if (caravanas[i]->getLinha() == caravanas[j]->getLinha() &&
+                caravanas[i]->getColuna() == caravanas[j]->getColuna()) {
+                std::cout << "Interação entre caravanas " << caravanas[i]->getId()
+                          << " e " << caravanas[j]->getId() << " na posição ("
+                          << caravanas[i]->getLinha() << ", " << caravanas[i]->getColuna() << ")." << std::endl;
 
-    // Atualizar duração dos itens
-    for (auto it = itens.begin(); it != itens.end();) {
-        if (--duracaoItem <= 0) {
-            atualizarGrid(it->linha, it->coluna, '.');
-            std::cout << "Item em (" << it->linha << ", " << it->coluna << ") foi removido." << std::endl;
-            it = itens.erase(it);
-            houveMudanca = true;
-        } else {
-            ++it;
+                // Exemplo de regra: Militar protege Comércio
+                if (caravanas[i]->getTipo() == "Militar" && caravanas[j]->getTipo() == "Comercio") {
+                    std::cout << "Caravana Militar " << caravanas[i]->getId()
+                              << " protegeu a Caravana de Comércio " << caravanas[j]->getId() << "." << std::endl;
+                } else if (caravanas[j]->getTipo() == "Militar" && caravanas[i]->getTipo() == "Comercio") {
+                    std::cout << "Caravana Militar " << caravanas[j]->getId()
+                              << " protegeu a Caravana de Comércio " << caravanas[i]->getId() << "." << std::endl;
+                }
+            }
         }
     }
 
@@ -239,3 +361,4 @@ void Mapa::executarSimulacao() {
         imprimirMapa();
     }
 }
+

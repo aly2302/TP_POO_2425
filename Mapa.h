@@ -7,14 +7,17 @@
 #include "Caravana.h"
 #include "Item.h"
 #include "Cidade.h"
+#include "Buffer.h"
 
 class Mapa {
 private:
+    // Atributos do mapa
     int linhas;
     int colunas;
     char* grid;
+    Buffer* buffer; // Ponteiro para o buffer para exibição
 
-    // Parâmetros adicionais
+    // Parâmetros configuráveis
     int moedas;
     int instantesEntreNovosItens;
     int duracaoItem;
@@ -25,17 +28,33 @@ private:
     int instantesEntreNovosBarbaros;
     int duracaoBarbaros;
 
+    // Listas de entidades
     std::vector<std::unique_ptr<Caravana>> caravanas;
     std::vector<Item> itens;
     std::vector<Cidade> cidades;
 
+    // Métodos auxiliares
     int calcularIndice(int linha, int coluna) const;
     bool posicaoValida(int linha, int coluna) const;
 
 public:
-    // Construtor
-    Mapa(const std::string& nomeFicheiro);
+    // Construtor e destrutor
+    Mapa(const std::string& nomeFicheiro, Buffer* buffer);
     ~Mapa();
+
+    // Métodos de acesso a parâmetros configuráveis
+    int getMoedas() const;
+    int getInstantesEntreNovosItens() const;
+    int getDuracaoItem() const;
+    int getMaxItens() const;
+    int getPrecoVendaMercadoria() const;
+    int getPrecoCompraMercadoria() const;
+    int getPrecoCaravana() const;
+    int getInstantesEntreNovosBarbaros() const;
+    int getDuracaoBarbaros() const;
+    int getNumeroCaravanas() const;
+    bool reduzirMoedas(int quantidade);
+
 
     // Gerenciamento do grid
     void atualizarGrid(int linha, int coluna, char simbolo);
@@ -52,13 +71,17 @@ public:
     void adicionarItem(const Item& item);
     Item* encontrarItemProximo(int linha, int coluna, int raio) const;
 
+    // Gerenciamento de cidades
     void adicionarCidade(const Cidade& cidade);
     void listarCidades() const;
 
-
+    // Lógica de simulação
     void executarSimulacao();
+    bool resolverCombates(int& combatesVencidos);
 
-    // Outros
+    // Métodos auxiliares
+    bool estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const;
+    bool simularCombate(Caravana& jogador, Caravana& barbara);
     std::pair<int, int> gerarMovimentoAleatorio(int linha, int coluna) const;
 };
 
