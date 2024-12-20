@@ -1,6 +1,8 @@
 #include "Mapa.h"
 #include <iostream>
 
+//testar código
+
 void exibirMenu() {
     std::cout << "\nComandos disponíveis:" << std::endl;
     std::cout << "1. Criar caravana de comércio" << std::endl;
