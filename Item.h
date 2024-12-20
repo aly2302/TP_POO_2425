@@ -5,6 +5,7 @@ class Item {
 public:
     int linha;
     int coluna;
+    int peso;
     char simbolo; // Ex: 'I' para identificar itens
     int duracao;  // Duração em turnos
 

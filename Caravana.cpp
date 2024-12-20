@@ -1,8 +1,9 @@
 #include "Caravana.h"
 #include "Mapa.h"
-#include <stdexcept>
+#include <iostream>
+#include <cmath>
 
-// Base Caravana implementation
+// ================== Classe Base Caravana ==================
 Caravana::Caravana(int id, int linha, int coluna, int capacidadeCarga, int capacidadeAgua, int tripulantesInicial)
         : id(id), linha(linha), coluna(coluna), capacidadeCarga(capacidadeCarga), capacidadeAgua(capacidadeAgua),
           tripulantes(tripulantesInicial), aguaAtual(capacidadeAgua), cargaAtual(0) {}
@@ -24,25 +25,18 @@ void Caravana::moverPara(int novaLinha, int novaColuna) {
 void Caravana::adicionarCarga(int quantidade) {
     if (cargaAtual + quantidade <= capacidadeCarga) {
         cargaAtual += quantidade;
-    } else {
-        throw std::runtime_error("Capacidade de carga excedida.");
     }
 }
 
 void Caravana::removerCarga(int quantidade) {
-    if (cargaAtual - quantidade >= 0) {
+    if (cargaAtual >= quantidade) {
         cargaAtual -= quantidade;
-    } else {
-        throw std::runtime_error("Carga insuficiente para remover.");
     }
 }
 
 void Caravana::consumirAgua(int quantidade) {
-    if (aguaAtual - quantidade >= 0) {
+    if (aguaAtual >= quantidade) {
         aguaAtual -= quantidade;
-    } else {
-        aguaAtual = 0;
-        throw std::runtime_error("Sem água suficiente.");
     }
 }
 
@@ -51,69 +45,114 @@ void Caravana::adicionarTripulantes(int quantidade) {
 }
 
 void Caravana::removerTripulantes(int quantidade) {
-    if (tripulantes - quantidade >= 0) {
-        tripulantes -= quantidade;
-    } else {
-        throw std::runtime_error("Tripulantes insuficientes.");
-    }
+    tripulantes = std::max(0, tripulantes - quantidade);
 }
 
-// CaravanaComercio
+// ================== Caravana de Comércio ==================
 CaravanaComercio::CaravanaComercio(int id, int linha, int coluna)
-        : Caravana(id, linha, coluna, 40, 200, 20) {}
+        : Caravana(id, linha, coluna, 40, 200, 10) {}
 
-bool CaravanaComercio::estaSemAgua() const { return aguaAtual <= 0; }
+bool CaravanaComercio::estaSemAgua() const { return aguaAtual == 0; }
+
 bool CaravanaComercio::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
 void CaravanaComercio::executarComportamento(Mapa& mapa) {
-    // Look for adjacent caravans
-    auto proximas = mapa.encontrarCaravanasAdjacentes(linha, coluna);
-    if (!proximas.empty()) {
-        auto [novaLinha, novaColuna] = proximas.front();
-        moverPara(novaLinha, novaColuna);
-        return;
+    // Exemplo: Mover para o primeiro item próximo
+    auto item = mapa.encontrarItemProximo(linha, coluna, 2);
+    if (item && !estaCheia()) {
+        moverPara(item->linha, item->coluna);
+        adicionarCarga(item->peso);
+        mapa.removerItem(item->linha, item->coluna);
     }
-
-    // Look for nearby items
-    auto itemProximo = mapa.encontrarItemProximo(linha, coluna, 2);
-    if (itemProximo) {
-        moverPara(itemProximo->linha, itemProximo->coluna);
-    }
+    consumirAgua(2);
 }
 
-// CaravanaMilitar
+// ================== Caravana Militar ==================
 CaravanaMilitar::CaravanaMilitar(int id, int linha, int coluna)
-        : Caravana(id, linha, coluna, 5, 400, 40) {}
+        : Caravana(id, linha, coluna, 5, 400, 15) {}
 
-bool CaravanaMilitar::estaSemAgua() const { return aguaAtual <= 0; }
+bool CaravanaMilitar::estaSemAgua() const { return aguaAtual == 0; }
+
 bool CaravanaMilitar::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
+
 void CaravanaMilitar::executarComportamento(Mapa& mapa) {
-    auto barbaroProximo = mapa.encontrarCaravanaBarbaraProxima(linha, coluna, 6);
-    if (barbaroProximo) {
-        moverPara(barbaroProximo->getLinha(), barbaroProximo->getColuna());
+    // Localizar caravanas bárbaras próximas
+    auto barbaro = mapa.encontrarCaravanaBarbaraProxima(linha, coluna, 1);
+    if (barbaro) {
+        int sorteioMilitar = std::rand() % (tripulantes + 1);
+        int sorteioBarbara = std::rand() % (barbaro->getTripulantes() + 1);
+
+        // Determinar vencedor
+        if (sorteioMilitar >= sorteioBarbara) {
+            // Militar vence
+            int perdaMilitar = static_cast<int>(tripulantes * 0.2);
+            int perdaBarbara = 2 * perdaMilitar;
+            removerTripulantes(perdaMilitar);
+            barbaro->removerTripulantes(perdaBarbara);
+
+            if (barbaro->getTripulantes() <= 0) {
+                // Barbaro destruído
+                int aguaTransferida = std::min(barbaro->getAguaAtual(), capacidadeAgua - aguaAtual);
+                aguaAtual += aguaTransferida;
+                barbaro->consumirAgua(aguaTransferida); // Consome a água transferida
+                mapa.removerCaravana(barbaro->getId());
+            }
+        } else {
+            // Bárbaro vence
+            int perdaBarbara = static_cast<int>(barbaro->getTripulantes() * 0.2);
+            int perdaMilitar = 2 * perdaBarbara;
+            barbaro->removerTripulantes(perdaBarbara);
+            removerTripulantes(perdaMilitar);
+
+            if (tripulantes <= 0) {
+                // Militar destruído
+                mapa.removerCaravana(id);
+            }
+        }
     }
+
+    consumirAgua(3);
 }
 
-// CaravanaSecreta
-CaravanaSecreta::CaravanaSecreta(int id, int linha, int coluna)
-        : Caravana(id, linha, coluna, 20, 300, 30) {}
 
-bool CaravanaSecreta::estaSemAgua() const { return aguaAtual <= 0; }
+
+// ================== Caravana Secreta ==================
+CaravanaSecreta::CaravanaSecreta(int id, int linha, int coluna)
+        : Caravana(id, linha, coluna, 10, 100, 8) {}
+
+bool CaravanaSecreta::estaSemAgua() const { return aguaAtual == 0; }
+
 bool CaravanaSecreta::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
 void CaravanaSecreta::executarComportamento(Mapa& mapa) {
-    auto novaPos = mapa.gerarMovimentoAleatorio(linha, coluna);
-    moverPara(novaPos.first, novaPos.second);
+    // Buscar itens no raio de 3 posições
+    auto item = mapa.encontrarItemProximo(linha, coluna, 3);
+    if (item && !estaCheia()) {
+        // Move-se para o item, mesmo que esteja próximo de bárbaros
+        moverPara(item->linha, item->coluna);
+        adicionarCarga(item->peso);
+        mapa.removerItem(item->linha, item->coluna);
+
+        std::cout << "Caravana Secreta coletou um item na posição ("
+                  << item->linha << ", " << item->coluna << ")." << std::endl;
+    } else {
+        // Movimento aleatório se nenhum item for encontrado
+        auto novaPosicao = mapa.gerarMovimentoAleatorio(linha, coluna);
+        moverPara(novaPosicao.first, novaPosicao.second);
+    }
+
+    // Consumir água no final do turno
+    consumirAgua(1);
 }
 
-// CaravanaBarbara
+
+// ================== Caravana Bárbara ==================
 CaravanaBarbara::CaravanaBarbara(int id, int linha, int coluna)
-        : Caravana(id, linha, coluna, 0, 0, 10) {}
+        : Caravana(id, linha, coluna, 0, 0, 12) {}
 
 void CaravanaBarbara::executarComportamento(Mapa& mapa) {
-    auto novaPos = mapa.gerarMovimentoAleatorio(linha, coluna);
-    moverPara(novaPos.first, novaPos.second);
-    std::cout << "Caravana Barbara " << getId() << " moveu-se para ("
-              << novaPos.first << ", " << novaPos.second << ").\n";
+    // Movimento aleatório
+    auto novaPosicao = mapa.gerarMovimentoAleatorio(linha, coluna);
+    moverPara(novaPosicao.first, novaPosicao.second);
 }

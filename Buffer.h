@@ -1,7 +1,9 @@
+// Buffer.h - Revisado e otimizado
 #ifndef TP_POO_2425_BUFFER_H
 #define TP_POO_2425_BUFFER_H
 
 #include <iostream>
+#include <cstddef>
 
 class Buffer {
 private:
@@ -18,11 +20,13 @@ public:
     void moverCursor(int linha, int coluna);
     void escreverCaractere(char c);
     void escreverString(const char* str);
+    void escreverInteiro(int num);
     void imprimirBuffer() const;
 
-    // Operadores sobrecarregados
     Buffer& operator<<(const char* str);
     Buffer& operator<<(char c);
+    Buffer& operator<<(int num);
+    Buffer& operator<<(std::size_t num); // Adicionado para resolver ambiguidade
 };
 
-#endif //TP_POO_2425_BUFFER_H
+#endif // TP_POO_2425_BUFFER_H

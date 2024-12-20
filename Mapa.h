@@ -1,3 +1,4 @@
+
 #ifndef TP_POO_2425_MAPA_H
 #define TP_POO_2425_MAPA_H
 
@@ -14,7 +15,7 @@ private:
     int linhas;
     int colunas;
     char* grid;
-    Buffer* buffer;
+    Buffer* buffer; // Ponteiro para o buffer associado
 
     // Parâmetros adicionais
     int moedas;
@@ -60,7 +61,6 @@ public:
 
     std::pair<int, int> gerarMovimentoAleatorio(int linha, int coluna) const;
 
-
     // Gerenciamento de cidades
     void adicionarCidade(const Cidade& cidade);
     void listarCidades() const;
@@ -75,6 +75,25 @@ public:
 
     // Imprimir estado do mapa
     void imprimirMapa() const;
+
+    // Mapa.h
+    void removerItem(int linha, int coluna);
+    void removerCaravana(int id);
+    void adicionarCaravanaBarbaraAleatoria();
+
+    void comprarCaravana(const std::string& tipo, const std::string& nomeCidade);
+    void venderMercadoria(int idCaravana);
+    void comprarMercadoria(int idCaravana, int quantidade);
+    void contratarTripulantes(int idCaravana, int quantidade);
+
+    // Atualizar buffer com estado do mapa
+    void atualizarBuffer();
+
+
 };
+
+
+
+
 
 #endif // TP_POO_2425_MAPA_H

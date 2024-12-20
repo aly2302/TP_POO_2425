@@ -6,7 +6,7 @@
 
 class Mapa;
 
-// Base abstract class for caravanas
+// Classe base abstrata para caravanas
 class Caravana {
 protected:
     int id;
@@ -22,7 +22,7 @@ public:
     Caravana(int id, int linha, int coluna, int capacidadeCarga, int capacidadeAgua, int tripulantesInicial);
     virtual ~Caravana() = default;
 
-    // Accessors
+    // Métodos de acesso
     int getId() const;
     int getLinha() const;
     int getColuna() const;
@@ -33,7 +33,7 @@ public:
     int getCargaAtual() const;
     virtual std::string getTipo() const = 0;
 
-    // Modifiers
+    // Métodos modificadores
     void moverPara(int novaLinha, int novaColuna);
     void adicionarCarga(int quantidade);
     void removerCarga(int quantidade);
@@ -41,13 +41,13 @@ public:
     void adicionarTripulantes(int quantidade);
     void removerTripulantes(int quantidade);
 
-    // Polymorphic behavior
+    // Comportamentos polimórficos
     virtual bool estaSemAgua() const = 0;
     virtual bool estaCheia() const = 0;
     virtual void executarComportamento(Mapa& mapa) = 0;
 };
 
-// Commerce caravan
+// Caravana de Comércio
 class CaravanaComercio : public Caravana {
 public:
     CaravanaComercio(int id, int linha, int coluna);
@@ -57,7 +57,7 @@ public:
     std::string getTipo() const override { return "Comercio"; }
 };
 
-// Military caravan
+// Caravana Militar
 class CaravanaMilitar : public Caravana {
 public:
     CaravanaMilitar(int id, int linha, int coluna);
@@ -67,7 +67,7 @@ public:
     std::string getTipo() const override { return "Militar"; }
 };
 
-// Secret caravan
+// Caravana Secreta
 class CaravanaSecreta : public Caravana {
 public:
     CaravanaSecreta(int id, int linha, int coluna);
@@ -77,12 +77,12 @@ public:
     std::string getTipo() const override { return "Secreta"; }
 };
 
-// Barbarian caravan
+// Caravana Bárbara
 class CaravanaBarbara : public Caravana {
 public:
     CaravanaBarbara(int id, int linha, int coluna);
-    bool estaSemAgua() const override { return false; } // Barbarians don't use water
-    bool estaCheia() const override { return false; }   // Barbarians don't carry cargo
+    bool estaSemAgua() const override { return false; } // Bárbaros não consomem água
+    bool estaCheia() const override { return false; }   // Bárbaros não têm capacidade de carga
     void executarComportamento(Mapa& mapa) override;
     std::string getTipo() const override { return "Barbara"; }
 };

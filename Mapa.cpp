@@ -1,3 +1,4 @@
+// Mapa.cpp - Completo e otimizado
 #include "Mapa.h"
 #include <fstream>
 #include <sstream>
@@ -6,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include <algorithm>
 
 Mapa::Mapa(const std::string& nomeFicheiro, Buffer* buffer) : buffer(buffer) {
     std::ifstream ficheiro(nomeFicheiro);
@@ -103,18 +105,14 @@ void Mapa::adicionarCaravana(std::unique_ptr<Caravana> caravana) {
         throw std::out_of_range("Posição inválida para adicionar a caravana.");
     }
 
-    char simbolo = 'C'; // Padrão: Comércio
-    if (caravana->getTipo() == "Militar") {
-        simbolo = 'M';
-    } else if (caravana->getTipo() == "Secreta") {
-        simbolo = 'S';
-    } else if (caravana->getTipo() == "Barbara") {
-        simbolo = 'B';
-    }
-
+    // Usar o ID da caravana como símbolo no grid
+    int id = caravana->getId();
+    char simbolo = (id < 10) ? '0' + id : '*'; // Simbolo para IDs > 9
     atualizarGrid(caravana->getLinha(), caravana->getColuna(), simbolo);
-    caravanas.push_back(std::move(caravana));
+
+    caravanas.push_back(std::move(caravana)); // Adiciona a caravana à lista
 }
+
 
 void Mapa::moverCaravana(int id, int novaLinha, int novaColuna) {
     for (auto& caravana : caravanas) {
@@ -123,28 +121,22 @@ void Mapa::moverCaravana(int id, int novaLinha, int novaColuna) {
                 throw std::out_of_range("Posição inválida para mover a caravana.");
             }
 
-            // Limpar posição anterior
+            // Limpar posição anterior no grid
             atualizarGrid(caravana->getLinha(), caravana->getColuna(), '.');
 
-            // Atualizar posição
+            // Atualizar posição da caravana
             caravana->moverPara(novaLinha, novaColuna);
 
-            // Atualizar grid com novo símbolo
-            char simbolo = 'C'; // Padrão: Comércio
-            if (caravana->getTipo() == "Militar") {
-                simbolo = 'M';
-            } else if (caravana->getTipo() == "Secreta") {
-                simbolo = 'S';
-            } else if (caravana->getTipo() == "Barbara") {
-                simbolo = 'B';
-            }
-
+            // Atualizar grid com o ID da caravana
+            char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
             atualizarGrid(novaLinha, novaColuna, simbolo);
+
             return;
         }
     }
     throw std::runtime_error("Caravana com ID não encontrada.");
 }
+
 
 void Mapa::adicionarCidade(const Cidade& cidade) {
     if (!posicaoValida(cidade.getLinha(), cidade.getColuna())) {
@@ -181,9 +173,9 @@ int Mapa::gerarIDCaravana() {
 }
 
 std::pair<int, int> Mapa::gerarMovimentoAleatorio(int linha, int coluna) const {
-    int delta[] = {-1, 0, 1}; // Movement options: stay, up/down, left/right
-    int novaLinha = linha + delta[std::rand() % 3];
-    int novaColuna = coluna + delta[std::rand() % 3];
+    int movimento[] = {-1, 0, 1}; // Movement options: stay, up/down, left/right
+    int novaLinha = linha + movimento[std::rand() % 3];
+    int novaColuna = coluna + movimento[std::rand() % 3];
     if (posicaoValida(novaLinha, novaColuna)) {
         return {novaLinha, novaColuna};
     }
@@ -198,6 +190,20 @@ void Mapa::adicionarItem(int linha, int coluna) {
     }
 }
 
+
+void Mapa::adicionarCaravanaBarbaraAleatoria() {
+    int linha = std::rand() % linhas;
+    int coluna = std::rand() % colunas;
+
+    // Verificar se a posição está livre para adicionar uma caravana bárbara
+    if (obterGrid(linha, coluna) == '.') {
+        adicionarCaravana(std::make_unique<CaravanaBarbara>(gerarIDCaravana(), linha, coluna));
+        std::cout << "Nova caravana bárbara gerada em (" << linha << ", " << coluna << ")." << std::endl;
+    }
+}
+
+
+
 Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
     for (auto& item : itens) {
         int distLinha = std::abs(item.linha - linha);
@@ -208,7 +214,6 @@ Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
     }
     return nullptr;
 }
-
 
 Caravana* Mapa::encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio) const {
     for (const auto& caravana : caravanas) {
@@ -221,8 +226,145 @@ Caravana* Mapa::encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio)
     return nullptr;
 }
 
+void Mapa::atualizarBuffer() {
+    buffer->limparBuffer();
 
+    // Atualizar o buffer com o grid do mapa
+    for (int i = 0; i < linhas; ++i) {
+        for (int j = 0; j < colunas; ++j) {
+            buffer->moverCursor(i, j);
+            buffer->escreverCaractere(obterGrid(i, j));
+        }
+    }
 
+    // Adicionar informações adicionais no buffer
+    buffer->moverCursor(linhas, 0);
+    *buffer << "Moedas: " << moedas << "\n";
+    *buffer << "Caravanas: " << caravanas.size() << "\n";
+    *buffer << "Cidades: " << cidades.size() << "\n";
+    *buffer << "Itens: " << itens.size() << "\n";
+}
+
+void Mapa::removerItem(int linha, int coluna) {
+    auto it = std::find_if(itens.begin(), itens.end(), [linha, coluna](const Item& item) {
+        return item.linha == linha && item.coluna == coluna;
+    });
+
+    if (it != itens.end()) {
+        itens.erase(it);
+    }
+}
+
+void Mapa::removerCaravana(int id) {
+    auto it = std::remove_if(caravanas.begin(), caravanas.end(), [id](const std::unique_ptr<Caravana>& caravana) {
+        return caravana->getId() == id;
+    });
+
+    if (it != caravanas.end()) {
+        caravanas.erase(it, caravanas.end());
+    }
+}
+
+void Mapa::contratarTripulantes(int idCaravana, int quantidade) {
+    // Encontrar a caravana pelo ID
+    auto caravana = std::find_if(caravanas.begin(), caravanas.end(), [idCaravana](const std::unique_ptr<Caravana>& c) {
+        return c->getId() == idCaravana;
+    });
+
+    if (caravana != caravanas.end()) {
+        // Verificar se está em uma cidade
+        bool estaEmCidade = false;
+        for (const auto& cidade : cidades) {
+            if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
+                estaEmCidade = true;
+                break;
+            }
+        }
+
+        if (!estaEmCidade) {
+            std::cout << "A caravana precisa estar em uma cidade para contratar tripulantes.\n";
+            return;
+        }
+
+        // Verificar moedas e contratar tripulantes
+        int custoTotal = quantidade; // 1 moeda por tripulante
+        if (moedas >= custoTotal) {
+            (*caravana)->adicionarTripulantes(quantidade);
+            moedas -= custoTotal;
+            std::cout << "Caravana " << idCaravana << " contratou " << quantidade << " tripulantes.\n";
+        } else {
+            std::cout << "Moedas insuficientes para contratar tripulantes.\n";
+        }
+    } else {
+        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+    }
+}
+
+void Mapa::comprarMercadoria(int idCaravana, int quantidade) {
+    auto caravana = std::find_if(caravanas.begin(), caravanas.end(), [idCaravana](const std::unique_ptr<Caravana>& c) {
+        return c->getId() == idCaravana;
+    });
+
+    if (caravana != caravanas.end()) {
+        // Verificar se está em uma cidade
+        bool estaEmCidade = false;
+        for (const auto& cidade : cidades) {
+            if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
+                estaEmCidade = true;
+                break;
+            }
+        }
+
+        if (!estaEmCidade) {
+            std::cout << "A caravana precisa estar em uma cidade para comprar mercadoria.\n";
+            return;
+        }
+
+        int custoTotal = quantidade; // 1 moeda por tonelada
+        if (moedas >= custoTotal && !(*caravana)->estaCheia()) {
+            (*caravana)->adicionarCarga(quantidade);
+            moedas -= custoTotal;
+            std::cout << "Caravana " << idCaravana << " comprou " << quantidade << " toneladas de mercadoria.\n";
+        } else {
+            std::cout << "Moedas insuficientes ou caravana cheia.\n";
+        }
+    } else {
+        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+    }
+}
+
+void Mapa::venderMercadoria(int idCaravana) {
+    auto caravana = std::find_if(caravanas.begin(), caravanas.end(), [idCaravana](const std::unique_ptr<Caravana>& c) {
+        return c->getId() == idCaravana;
+    });
+
+    if (caravana != caravanas.end()) {
+        // Verificar se está em uma cidade
+        bool estaEmCidade = false;
+        for (const auto& cidade : cidades) {
+            if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
+                estaEmCidade = true;
+                break;
+            }
+        }
+
+        if (!estaEmCidade) {
+            std::cout << "A caravana precisa estar em uma cidade para vender mercadoria.\n";
+            return;
+        }
+
+        int quantidade = (*caravana)->getCargaAtual();
+        int valorVenda = quantidade * 2; // 2 moedas por tonelada
+        moedas += valorVenda;
+        (*caravana)->removerCarga(quantidade);
+
+        std::cout << "Caravana " << idCaravana << " vendeu " << quantidade << " toneladas de mercadoria por " << valorVenda << " moedas.\n";
+    } else {
+        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+    }
+}
+
+/*
 void Mapa::executarSimulacao() {
     bool houveMudanca = false;
 
@@ -231,6 +373,7 @@ void Mapa::executarSimulacao() {
         auto posAnterior = std::make_pair(caravana->getLinha(), caravana->getColuna());
         caravana->executarComportamento(*this);
         auto posAtual = std::make_pair(caravana->getLinha(), caravana->getColuna());
+
         if (posAnterior != posAtual) {
             std::cout << "Caravana " << caravana->getId()
                       << " moveu-se de (" << posAnterior.first << ", " << posAnterior.second
@@ -239,32 +382,24 @@ void Mapa::executarSimulacao() {
         }
     }
 
-    // Gerar novos itens se possível
+    // Gerar novos itens, respeitando o limite de itens no mapa
     if (itens.size() < static_cast<size_t>(maxItens)) {
-        int novaLinha = std::rand() % linhas;
-        int novaColuna = std::rand() % colunas;
-        if (obterGrid(novaLinha, novaColuna) == '.') {
-            adicionarItem(novaLinha, novaColuna);
-            std::cout << "Novo item gerado em (" << novaLinha << ", " << novaColuna << ")." << std::endl;
-            houveMudanca = true;
-        }
+        adicionarItemAleatorio();
+        houveMudanca = true;
     }
 
-    // Geração de caravanas bárbaras
+    // Gerar novas caravanas bárbaras, respeitando o intervalo configurado
     static int contadorBarbaros = 0;
     if (++contadorBarbaros >= instantesEntreNovosBarbaros) {
-        int linha = std::rand() % linhas;
-        int coluna = std::rand() % colunas;
-        if (obterGrid(linha, coluna) == '.') {
-            adicionarCaravana(std::make_unique<CaravanaBarbara>(gerarIDCaravana(), linha, coluna));
-            std::cout << "Nova caravana bárbara gerada em (" << linha << ", " << coluna << ")." << std::endl;
-            contadorBarbaros = 0;
-            houveMudanca = true;
-        }
+        adicionarCaravanaBarbaraAleatoria();
+        contadorBarbaros = 0;
+        houveMudanca = true;
     }
 
-    // Exibir mapa apenas se houve mudanças
+    // Atualizar o buffer apenas se houve mudanças
     if (houveMudanca) {
-        imprimirMapa();
+        atualizarBuffer();
+        buffer->imprimirBuffer();
     }
 }
+*/

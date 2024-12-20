@@ -1,8 +1,9 @@
-// Alterações no ficheiro Buffer.cpp
+// Buffer.cpp - Revisado e otimizado
 #include "Buffer.h"
 #include <cstring>
 
-Buffer::Buffer(int linhas, int colunas) : linhas(linhas), colunas(colunas), cursorLinha(0), cursorColuna(0) {
+Buffer::Buffer(int linhas, int colunas)
+        : linhas(linhas), colunas(colunas), cursorLinha(0), cursorColuna(0) {
     buffer = new char[linhas * colunas];
     limparBuffer();
 }
@@ -29,6 +30,9 @@ void Buffer::escreverCaractere(char c) {
     if (index < linhas * colunas) {
         buffer[index] = c;
         cursorColuna = (cursorColuna + 1) % colunas;
+        if (cursorColuna == 0) {
+            cursorLinha = (cursorLinha + 1) % linhas;
+        }
     }
 }
 
@@ -36,6 +40,12 @@ void Buffer::escreverString(const char* str) {
     while (*str) {
         escreverCaractere(*str++);
     }
+}
+
+void Buffer::escreverInteiro(int num) {
+    char numStr[12]; // Buffer suficiente para números inteiros
+    std::snprintf(numStr, sizeof(numStr), "%d", num);
+    escreverString(numStr);
 }
 
 void Buffer::imprimirBuffer() const {
@@ -49,14 +59,22 @@ void Buffer::imprimirBuffer() const {
 
 Buffer& Buffer::operator<<(const char* str) {
     if (str) {
-        while (*str) {
-            escreverCaractere(*str++);
-        }
+        escreverString(str);
     }
     return *this;
 }
 
 Buffer& Buffer::operator<<(char c) {
     escreverCaractere(c);
+    return *this;
+}
+
+Buffer& Buffer::operator<<(int num) {
+    escreverInteiro(num);
+    return *this;
+}
+
+Buffer& Buffer::operator<<(std::size_t num) {
+    escreverInteiro(static_cast<int>(num)); // Converte para int (assumindo que o valor é pequeno)
     return *this;
 }
