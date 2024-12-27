@@ -1,4 +1,3 @@
-
 #ifndef TP_POO_2425_MAPA_H
 #define TP_POO_2425_MAPA_H
 
@@ -7,8 +6,8 @@
 #include <string>
 #include "Caravana.h"
 #include "Item.h"
-#include "Cidade.h"
 #include "Buffer.h"
+
 
 class Mapa {
 private:
@@ -30,7 +29,7 @@ private:
 
     std::vector<std::unique_ptr<Caravana>> caravanas;
     std::vector<Item> itens;
-    std::vector<Cidade> cidades;
+    std::vector<Cidade*> cidades; // Usar ponteiros para evitar cópias desnecessárias
 
     int calcularIndice(int linha, int coluna) const;
     bool posicaoValida(int linha, int coluna) const;
@@ -62,7 +61,7 @@ public:
     std::pair<int, int> gerarMovimentoAleatorio(int linha, int coluna) const;
 
     // Gerenciamento de cidades
-    void adicionarCidade(const Cidade& cidade);
+    void adicionarCidade(Cidade* cidade); // Passar um ponteiro para a cidade
     void listarCidades() const;
 
     // Auxiliares
@@ -88,12 +87,6 @@ public:
 
     // Atualizar buffer com estado do mapa
     void atualizarBuffer();
-
-
 };
-
-
-
-
 
 #endif // TP_POO_2425_MAPA_H

@@ -3,8 +3,10 @@
 
 #include <string>
 #include <iostream>
-
-class Mapa;
+#include "Caravana.h"
+#include "Item.h"
+#include "Buffer.h"
+#include "Cidade.h"
 
 // Classe base abstrata para caravanas
 class Caravana {

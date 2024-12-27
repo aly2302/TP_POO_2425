@@ -27,6 +27,7 @@ int main() {
         std::string var2; // Variável para armazenar a var2
         std::string var3; // Variável para armazenar a var3
 
+
         bool executando = true;
         bool segunda_fase = false;
         while (executando) {
@@ -43,6 +44,7 @@ int main() {
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
                         std::cout << "Comando: " << comando << ", Nome do Ficheiro: " << nomeFicheiro << std::endl;
                         Mapa mapa(nomeFicheiro, &buffer); // Cria um objeto Mapa com o nome do ficheiro
+                        mapa.imprimirMapa();
                         segunda_fase = true;
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
@@ -55,6 +57,7 @@ int main() {
                     std::cout << "Comando desconhecido." << std::endl; // Mensagem de erro se o comando não for reconhecido
                 }
             }else{
+
                 if (comando == "exec") { // Verifica se o comando é "config" (exec <nomeFicheiro>)
                     iss >> nomeFicheiro; // Extrai o nome do ficheiro
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
