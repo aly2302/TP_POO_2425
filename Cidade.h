@@ -5,7 +5,8 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "Mapa.h"
+#include "Mapa.h"      // Certifique-se de que Mapa.h está incluído
+#include "Caravana.h"  // Inclua Caravana.h para que Caravana e suas subclasses sejam conhecidas
 
 class Cidade {
 private:
@@ -54,4 +55,3 @@ public:
 };
 
 #endif // TP_POO_2425_CIDADE_H
-
