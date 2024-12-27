@@ -6,7 +6,9 @@
 #include "Caravana.h"
 #include "Item.h"
 #include "Buffer.h"
-#include "Cidade.h"
+#include "Mapa.h"
+
+class Mapa;
 
 // Classe base abstrata para caravanas
 class Caravana {
@@ -52,10 +54,12 @@ public:
 // Caravana de Comércio
 class CaravanaComercio : public Caravana {
 public:
-    CaravanaComercio(int id, int linha, int coluna);
+    CaravanaComercio(int id, int linha, int coluna)
+            : Caravana(id, linha, coluna, 100, 50, 5) {} // Exemplo de capacidades
     bool estaSemAgua() const override;
     bool estaCheia() const override;
     void executarComportamento(Mapa& mapa) override;
+
     std::string getTipo() const override { return "Comercio"; }
 };
 
