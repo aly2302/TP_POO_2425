@@ -50,7 +50,6 @@ bool Cidade::comprarCaravana(char tipo) {
     }
 }
 
-
 void Cidade::comprarTripulantes(int idCaravana, int quantidade) const {
     // Encontrar a caravana pelo ID
     auto caravana = std::find_if(mapa.getCaravanas().begin(), mapa.getCaravanas().end(),
@@ -97,19 +96,18 @@ void Cidade::comprarMercadoria(int idCaravana, int quantidade) const {
         return;
     }
 
-
     // Verificar se a caravana está na mesma posição que esta cidade
     if ((*caravana)->getLinha() == linha && (*caravana)->getColuna() == coluna) {
         int custoTotal = quantidade * mapa.getPrecoCompra();
         if (mapa.getMoedas() >= custoTotal && !(*caravana)->estaCheia()) {
             (*caravana)->adicionarCarga(quantidade);
             mapa.reduzirMoedas(custoTotal);
-            std::cout << "Caravana " << idCaravana << " comprou " << quantidade << " toneladas de mercadoria.\n" << " por: " << custoTotal << " moedas.\n";
+            std::cout << "Caravana " << idCaravana << " comprou " << quantidade << " toneladas de mercadoria por " << custoTotal << " moedas.\n";
         } else {
             std::cout << "Moedas insuficientes ou caravana cheia.\n";
         }
     } else {
-        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+        std::cout << "Caravana " << idCaravana << " não está nesta cidade para comprar mercadoria.\n";
     }
 }
 
@@ -125,7 +123,6 @@ void Cidade::venderMercadoria(int idCaravana) const {
         return;
     }
 
-
     // Verificar se a caravana está na mesma posição que esta cidade
     if ((*caravana)->getLinha() == linha && (*caravana)->getColuna() == coluna) {
         int quantidade = (*caravana)->getCargaAtual();
@@ -134,12 +131,10 @@ void Cidade::venderMercadoria(int idCaravana) const {
         (*caravana)->removerCarga(quantidade);
 
         std::cout << "Caravana " << idCaravana << " vendeu " << quantidade << " toneladas de mercadoria por " << valorVenda << " moedas.\n";
-
     } else {
-        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+        std::cout << "Caravana " << idCaravana << " não está nesta cidade para vender mercadoria.\n";
     }
 }
-
 
 // Método para imprimir detalhes da cidade
 void Cidade::imprimirDetalhes() const {
