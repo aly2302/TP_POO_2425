@@ -1,29 +1,52 @@
 #include "Cidade.h"
 
 // Método para comprar uma caravana
-bool Cidade::comprarCaravana() {
-    if (caravanasDisponiveis.empty()) {
-        std::cout << "Não há caravanas disponíveis para compra." << std::endl;
-        return false; // Retorna se não houver caravanas disponíveis
+bool Cidade::comprarCaravana(char tipo) {
+    std::string tipoCaravana;
+
+    // Traduzir o caractere para o tipo correspondente
+    switch (tipo) {
+        case 'C':
+            tipoCaravana = "Comercio";
+            break;
+        case 'M':
+            tipoCaravana = "Militar";
+            break;
+        case 'S':
+            tipoCaravana = "Secreta";
+            break;
+        default:
+            std::cout << "Tipo de caravana inválido. Use C, M ou S." << std::endl;
+            return false;
     }
 
-    // Tenta comprar a primeira caravana disponível
-    std::unique_ptr<Caravana> caravana = std::move(caravanasDisponiveis.front()); // Pega a primeira caravana
+    // Procurar no vetor uma caravana do tipo especificado
+    auto it = std::find_if(caravanasDisponiveis.begin(), caravanasDisponiveis.end(),
+                           [&tipoCaravana](const std::unique_ptr<Caravana>& caravana) {
+                               return caravana->getTipo() == tipoCaravana;
+                           });
 
-    if (mapa.getMoedas() >= mapa.getPrecoCaravana()) { // Preço da caravana
+    if (it == caravanasDisponiveis.end()) {
+        std::cout << "Não há caravanas do tipo " << tipoCaravana << " disponíveis para compra." << std::endl;
+        return false; // Nenhuma caravana do tipo encontrado
+    }
+
+    // Verificar se há moedas suficientes para comprar a caravana
+    if (mapa.getMoedas() >= mapa.getPrecoCaravana()) {
         // Deduzir o custo
         mapa.reduzirMoedas(mapa.getPrecoCaravana());
-        std::cout << "Caravana comprada com sucesso!" << std::endl;
 
-        // Mover o unique_ptr para o mapa
-        mapa.adicionarCaravana(std::move(caravana));
+        // Mover o unique_ptr da caravana comprada para o mapa
+        mapa.adicionarCaravana(std::move(*it));
 
-        // Remove a caravana da lista
-        caravanasDisponiveis.erase(caravanasDisponiveis.begin()); // Remove a caravana da lista
-        return true; // Retorna que a compra foi bem-sucedida
+        // Remover a caravana do vetor
+        caravanasDisponiveis.erase(it);
+
+        std::cout << "Caravana do tipo " << tipoCaravana << " comprada com sucesso!" << std::endl;
+        return true;
     } else {
-        std::cout << "Moedas insuficientes para comprar a caravana." << std::endl;
-        return false; // Retorna que a compra falhou
+        std::cout << "Moedas insuficientes para comprar a caravana do tipo " << tipoCaravana << "." << std::endl;
+        return false;
     }
 }
 
@@ -73,19 +96,18 @@ void Cidade::comprarMercadoria(int idCaravana, int quantidade) const {
         return;
     }
 
-
     // Verificar se a caravana está na mesma posição que esta cidade
     if ((*caravana)->getLinha() == linha && (*caravana)->getColuna() == coluna) {
-        int custoTotal = quantidade; // 1 moeda por tonelada
+        int custoTotal = quantidade * mapa.getPrecoCompra();
         if (mapa.getMoedas() >= custoTotal && !(*caravana)->estaCheia()) {
             (*caravana)->adicionarCarga(quantidade);
             mapa.reduzirMoedas(custoTotal);
-            std::cout << "Caravana " << idCaravana << " comprou " << quantidade << " toneladas de mercadoria.\n";
+            std::cout << "Caravana " << idCaravana << " comprou " << quantidade << " toneladas de mercadoria por " << custoTotal << " moedas.\n";
         } else {
             std::cout << "Moedas insuficientes ou caravana cheia.\n";
         }
     } else {
-        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+        std::cout << "Caravana " << idCaravana << " não está nesta cidade para comprar mercadoria.\n";
     }
 }
 
@@ -101,23 +123,21 @@ void Cidade::venderMercadoria(int idCaravana) const {
         return;
     }
 
-
     // Verificar se a caravana está na mesma posição que esta cidade
     if ((*caravana)->getLinha() == linha && (*caravana)->getColuna() == coluna) {
         int quantidade = (*caravana)->getCargaAtual();
-        int valorVenda = quantidade * 2; // 2 moedas por tonelada
+        int valorVenda = quantidade * mapa.getPrecoVenda();
         mapa.addMoedas(valorVenda);
         (*caravana)->removerCarga(quantidade);
 
         std::cout << "Caravana " << idCaravana << " vendeu " << quantidade << " toneladas de mercadoria por " << valorVenda << " moedas.\n";
-
     } else {
-        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+        std::cout << "Caravana " << idCaravana << " não está nesta cidade para vender mercadoria.\n";
     }
 }
-
 
 // Método para imprimir detalhes da cidade
 void Cidade::imprimirDetalhes() const {
     std::cout << "Cidade: " << nome << " em (" << linha << ", " << coluna << ")" << std::endl;
+    std::cout << "Número de caravanas disponíveis para comprar: " << caravanasDisponiveis.size() << std::endl;
 }
