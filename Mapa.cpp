@@ -137,7 +137,7 @@ void Mapa::moverCaravana(int id, int novaLinha, int novaColuna) {
     throw std::runtime_error("Caravana com ID não encontrada.");
 }
 
-/*
+
 void Mapa::adicionarCidade(const Cidade& cidade) {
     if (!posicaoValida(cidade.getLinha(), cidade.getColuna())) {
         throw std::out_of_range("Posição inválida para adicionar uma cidade.");
@@ -146,14 +146,12 @@ void Mapa::adicionarCidade(const Cidade& cidade) {
     cidades.push_back(cidade);
 }
 
-
-
 void Mapa::listarCidades() const {
     for (const auto& cidade : cidades) {
         cidade.imprimirDetalhes();
     }
 }
-*/
+
 bool Mapa::estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const {
     return (linha1 == linha2 && std::abs(coluna1 - coluna2) == 1) || // Mesma linha, colunas adjacentes
            (coluna1 == coluna2 && std::abs(linha1 - linha2) == 1);   // Mesma coluna, linhas adjacentes
@@ -243,9 +241,7 @@ void Mapa::atualizarBuffer() {
     buffer->moverCursor(linhas, 0);
     *buffer << "Moedas: " << moedas << "\n";
     *buffer << "Caravanas: " << caravanas.size() << "\n";
-    /*
     *buffer << "Cidades: " << cidades.size() << "\n";
-    */
     *buffer << "Itens: " << itens.size() << "\n";
 }
 
@@ -278,14 +274,13 @@ void Mapa::contratarTripulantes(int idCaravana, int quantidade) {
     if (caravana != caravanas.end()) {
         // Verificar se está em uma cidade
         bool estaEmCidade = false;
-        /*
         for (const auto& cidade : cidades) {
             if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
                 estaEmCidade = true;
                 break;
             }
         }
-        */
+
         if (!estaEmCidade) {
             std::cout << "A caravana precisa estar em uma cidade para contratar tripulantes.\n";
             return;
@@ -313,14 +308,13 @@ void Mapa::comprarMercadoria(int idCaravana, int quantidade) {
     if (caravana != caravanas.end()) {
         // Verificar se está em uma cidade
         bool estaEmCidade = false;
-        /*
         for (const auto& cidade : cidades) {
             if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
                 estaEmCidade = true;
                 break;
             }
         }
-        */
+
         if (!estaEmCidade) {
             std::cout << "A caravana precisa estar em uma cidade para comprar mercadoria.\n";
             return;
@@ -347,14 +341,13 @@ void Mapa::venderMercadoria(int idCaravana) {
     if (caravana != caravanas.end()) {
         // Verificar se está em uma cidade
         bool estaEmCidade = false;
-        /*
         for (const auto& cidade : cidades) {
             if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
                 estaEmCidade = true;
                 break;
             }
         }
-        */
+
         if (!estaEmCidade) {
             std::cout << "A caravana precisa estar em uma cidade para vender mercadoria.\n";
             return;
