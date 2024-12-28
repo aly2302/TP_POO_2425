@@ -85,7 +85,7 @@ void Cidade::comprarTripulantes(int idCaravana, int quantidade) const {
     }
 }
 
-void Cidade::comprarMercadoria(int idCaravana, int quantidade, int preco_compra) const {
+void Cidade::comprarMercadoria(int idCaravana, int quantidade) const {
     // Encontrar a caravana pelo ID
     auto caravana = std::find_if(mapa.getCaravanas().begin(), mapa.getCaravanas().end(),
                                  [idCaravana](const std::unique_ptr<Caravana>& c) {
@@ -100,7 +100,7 @@ void Cidade::comprarMercadoria(int idCaravana, int quantidade, int preco_compra)
 
     // Verificar se a caravana está na mesma posição que esta cidade
     if ((*caravana)->getLinha() == linha && (*caravana)->getColuna() == coluna) {
-        int custoTotal = quantidade * preco_compra;
+        int custoTotal = quantidade * mapa.getPrecoCompra();
         if (mapa.getMoedas() >= custoTotal && !(*caravana)->estaCheia()) {
             (*caravana)->adicionarCarga(quantidade);
             mapa.reduzirMoedas(custoTotal);
@@ -113,7 +113,7 @@ void Cidade::comprarMercadoria(int idCaravana, int quantidade, int preco_compra)
     }
 }
 
-void Cidade::venderMercadoria(int idCaravana, int preco_venda) const {
+void Cidade::venderMercadoria(int idCaravana) const {
     // Encontrar a caravana pelo ID
     auto caravana = std::find_if(mapa.getCaravanas().begin(), mapa.getCaravanas().end(),
                                  [idCaravana](const std::unique_ptr<Caravana>& c) {
@@ -129,7 +129,7 @@ void Cidade::venderMercadoria(int idCaravana, int preco_venda) const {
     // Verificar se a caravana está na mesma posição que esta cidade
     if ((*caravana)->getLinha() == linha && (*caravana)->getColuna() == coluna) {
         int quantidade = (*caravana)->getCargaAtual();
-        int valorVenda = quantidade * preco_venda;
+        int valorVenda = quantidade * mapa.getPrecoVenda();
         mapa.addMoedas(valorVenda);
         (*caravana)->removerCarga(quantidade);
 
@@ -147,8 +147,3 @@ void Cidade::imprimirDetalhes() const {
     std::cout << "Número de caravanas disponíveis para comprar: " << caravanasDisponiveis.size() << std::endl;
 }
 
-// Método para imprimir detalhes da cidade
-void Cidade::imprimirPrecos() const {
-    std::cout << "Preço de Compra da Mercadoria: " << preco_compra << std::endl;
-    std::cout << "Preço de Venda da Mercadoria: " << preco_venda << std::endl;
-}

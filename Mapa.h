@@ -38,6 +38,8 @@ public:
     int getMoedas() const;
     int getPrecoCaravana() const;
     int getNumeroCaravanas() const;
+    int getPrecoCompra() const { return precoCompraMercadoria; };;
+    int getPrecoVenda() const { return precoVendaMercadoria; };
 
     void atualizarGrid(int linha, int coluna, char simbolo);
     char obterGrid(int linha, int coluna) const;
@@ -73,7 +75,7 @@ public:
 
     const std::vector<std::unique_ptr<Caravana>>& getCaravanas() const;
 
-
+    void listagem_precos() const;
 };
 
 #endif // TP_POO_2425_MAPA_H

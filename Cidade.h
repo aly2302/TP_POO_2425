@@ -14,8 +14,6 @@ private:
     std::string nome;
     int linha;
     int coluna;
-    int preco_compra = 1;
-    int preco_venda = 2;
     std::vector<std::unique_ptr<Caravana>> caravanasDisponiveis;
     Mapa& mapa; // Referência ao objeto Mapa
 
@@ -37,8 +35,8 @@ private:
     }
 
 public:
-    Cidade(const std::string& nome, int linha, int coluna, int preco_compra, int preco_venda, Mapa& mapa)
-            : nome(nome), linha(linha), coluna(coluna), preco_compra(preco_compra), preco_venda(preco_venda), mapa(mapa) {
+    Cidade(const std::string& nome, int linha, int coluna, Mapa& mapa)
+            : nome(nome), linha(linha), coluna(coluna), mapa(mapa) {
         inicializarCaravanas();
     }
 
@@ -50,9 +48,6 @@ public:
     int getLinha() const { return linha; }
     int getColuna() const { return coluna; }
 
-    int getPreco_Compra() const { return preco_compra; }
-    int getPreco_Venda() const { return preco_venda; }
-
     // Método para comprar uma caravana
     bool comprarCaravana(char tipo);
 
@@ -60,10 +55,10 @@ public:
     void comprarTripulantes(int idCaravana, int quantidade) const;
 
     // Método para comprar Mercadoria
-    void comprarMercadoria(int idCaravana, int quantidade, int preco_compra = 1) const;
+    void comprarMercadoria(int idCaravana, int quantidade) const;
 
     // Método para vender Mercadoria
-    void venderMercadoria(int idCaravana, int preco_venda = 1) const;
+    void venderMercadoria(int idCaravana) const;
 
     // Outros métodos
     void imprimirDetalhes() const;

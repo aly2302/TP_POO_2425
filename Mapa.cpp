@@ -423,3 +423,8 @@ void Mapa::executarSimulacao() {
     }
 }
 */
+
+void Mapa::listagem_precos() const {
+    std::cout << "Preço de Compra da Mercadoria: " << precoCompraMercadoria << std::endl;
+    std::cout << "Preço de Venda da Mercadoria: " << precoVendaMercadoria << std::endl;
+}
