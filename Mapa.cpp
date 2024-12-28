@@ -384,6 +384,15 @@ void Mapa::venderMercadoria(int idCaravana) {
     }
 }
 
+int Mapa::getMoedas() const {
+    return moedas;
+}
+
+int Mapa::getPrecoCaravana()  const {
+    return precoCaravana; // Return the caravan price
+}
+
+
 /*
 void Mapa::executarSimulacao() {
     bool houveMudanca = false;
