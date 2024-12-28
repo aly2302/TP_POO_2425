@@ -146,4 +146,3 @@ void Cidade::imprimirDetalhes() const {
     std::cout << "Cidade: " << nome << " em (" << linha << ", " << coluna << ")" << std::endl;
     std::cout << "Número de caravanas disponíveis para comprar: " << caravanasDisponiveis.size() << std::endl;
 }
-

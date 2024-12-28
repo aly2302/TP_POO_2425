@@ -13,4 +13,5 @@ add_executable(TP_POO_2425 main.cpp
         Item.cpp
         Item.h
         Cidade.h
+        Cidade.cpp
 )

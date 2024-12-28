@@ -56,7 +56,8 @@
 				1,
 				4,
 				5,
-				7
+				7,
+				10
 			]
 		}
 	],
@@ -97,7 +98,8 @@
 				1,
 				4,
 				5,
-				7
+				7,
+				10
 			]
 		},
 		{
@@ -168,6 +170,12 @@
 			"backtrace" : 1,
 			"path" : "Cidade.h",
 			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "Cidade.cpp",
+			"sourceGroupIndex" : 0
 		}
 	],
 	"type" : "EXECUTABLE"

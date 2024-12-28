@@ -79,6 +79,12 @@ build CMakeFiles/TP_POO_2425.dir/Item.cpp.obj: CXX_COMPILER__TP_POO_2425_unscann
   OBJECT_DIR = CMakeFiles\TP_POO_2425.dir
   OBJECT_FILE_DIR = CMakeFiles\TP_POO_2425.dir
 
+build CMakeFiles/TP_POO_2425.dir/Cidade.cpp.obj: CXX_COMPILER__TP_POO_2425_unscanned_Debug C$:/Users/rodri/ISEC-2425/POO/TP_POO_2425/Cidade.cpp || cmake_object_order_depends_target_TP_POO_2425
+  DEP_FILE = CMakeFiles\TP_POO_2425.dir\Cidade.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\TP_POO_2425.dir
+  OBJECT_FILE_DIR = CMakeFiles\TP_POO_2425.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target TP_POO_2425
@@ -87,7 +93,7 @@ build CMakeFiles/TP_POO_2425.dir/Item.cpp.obj: CXX_COMPILER__TP_POO_2425_unscann
 #############################################
 # Link the executable TP_POO_2425.exe
 
-build TP_POO_2425.exe: CXX_EXECUTABLE_LINKER__TP_POO_2425_Debug CMakeFiles/TP_POO_2425.dir/main.cpp.obj CMakeFiles/TP_POO_2425.dir/Buffer.cpp.obj CMakeFiles/TP_POO_2425.dir/Mapa.cpp.obj CMakeFiles/TP_POO_2425.dir/Caravana.cpp.obj CMakeFiles/TP_POO_2425.dir/Item.cpp.obj
+build TP_POO_2425.exe: CXX_EXECUTABLE_LINKER__TP_POO_2425_Debug CMakeFiles/TP_POO_2425.dir/main.cpp.obj CMakeFiles/TP_POO_2425.dir/Buffer.cpp.obj CMakeFiles/TP_POO_2425.dir/Mapa.cpp.obj CMakeFiles/TP_POO_2425.dir/Caravana.cpp.obj CMakeFiles/TP_POO_2425.dir/Item.cpp.obj CMakeFiles/TP_POO_2425.dir/Cidade.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\TP_POO_2425.dir
