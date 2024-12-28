@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "Mapa.h"
+#include "Caravana.h"
 
 class Cidade {
 private:

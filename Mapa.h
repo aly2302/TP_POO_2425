@@ -1,6 +1,7 @@
 #ifndef TP_POO_2425_MAPA_H
 #define TP_POO_2425_MAPA_H
 
+#include "Cidade.h"  // or the correct path to Cidade.h
 #include <vector>
 #include <memory>
 #include <string>

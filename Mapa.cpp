@@ -309,7 +309,7 @@ void Mapa::comprarMercadoria(int idCaravana, int quantidade) {
         // Verificar se está em uma cidade
         bool estaEmCidade = false;
         for (const auto& cidade : cidades) {
-            if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
+            if (cidade.getLinha() == (*caravana)->getLinha() && cidade->getColuna() == (*caravana)->getColuna()) {
                 estaEmCidade = true;
                 break;
             }
