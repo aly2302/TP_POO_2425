@@ -3,10 +3,6 @@
 
 #include <string>
 #include <iostream>
-#include <memory>
-#include "Caravana.h"
-#include "Item.h"
-#include "Buffer.h"
 
 class Mapa;
 
@@ -58,7 +54,6 @@ public:
     bool estaSemAgua() const override;
     bool estaCheia() const override;
     void executarComportamento(Mapa& mapa) override;
-
     std::string getTipo() const override { return "Comercio"; }
 };
 
