@@ -45,6 +45,7 @@ public:
     char obterGrid(int linha, int coluna) const;
 
     void adicionarCaravana(std::unique_ptr<Caravana> caravana);
+    void listarCaravanas() const;
     void moverCaravana(int id, int novaLinha, int novaColuna);
     void removerCaravana(int id);
     void adicionarCaravanaBarbaraAleatoria();

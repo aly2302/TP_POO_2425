@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <memory>
-#include "Caravana.h"
 #include "Item.h"
 #include "Buffer.h"
 

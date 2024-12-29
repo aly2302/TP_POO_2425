@@ -27,6 +27,7 @@ int main() {
         std::string var2; // Variável para armazenar a var2
         std::string var3; // Variável para armazenar a var3
 
+        Mapa* mapa = nullptr;
 
         bool executando = true;
         bool segunda_fase = false;
@@ -43,8 +44,8 @@ int main() {
                     iss >> nomeFicheiro; // Extrai o nome do ficheiro
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
                         std::cout << "Comando: " << comando << ", Nome do Ficheiro: " << nomeFicheiro << std::endl;
-                        Mapa mapa(nomeFicheiro, &buffer); // Cria um objeto Mapa com o nome do ficheiro
-                        mapa.imprimirMapa();
+                        mapa = new Mapa(nomeFicheiro, &buffer); // Cria um objeto Mapa com o nome do ficheiro
+                        mapa->imprimirMapa();
                         segunda_fase = true;
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
@@ -248,6 +249,10 @@ int main() {
                     } else {
                         std::cout << "Erro: Nome não fornecido." << std::endl; // Mensagem de erro se o nome estiver vazio
                     }
+                }else if (comando == "caravanas_list") { // Verifica se o comando é "dels" (dels <nome>)
+                    std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
+                    mapa->listarCaravanas();
+
                 }else if (comando == "terminar") { // Verifica se o comando é "terminar"
                     executando = false;
                     std::cout << "Terminando o programa..." << std::endl;

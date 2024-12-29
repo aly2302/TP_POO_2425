@@ -33,6 +33,29 @@ Mapa::Mapa(const std::string& nomeFicheiro, Buffer* buffer) : buffer(buffer) {
             }
         }
 
+
+    // Processar o grid para adicionar caravanas
+        for (int i = 0; i < linhas; ++i) {
+            for (int j = 0; j < colunas; ++j) {
+                char caracter = grid[i * colunas + j];
+
+                // Verifica se o caractere é um número
+                if (std::isdigit(caracter)) {
+                    int id = caracter - '0';  // Converte o caractere para o valor numérico
+                    // Adiciona uma caravana de comércio na posição correta
+                    adicionarCaravana(std::make_unique<CaravanaComercio>(gerarIDCaravana(), i, j));
+                }
+                    // Verifica se o caractere é um '!' para caravana bárbara
+                else if (caracter == '!') {
+                    // Adiciona uma caravana bárbara na posição correta
+                    adicionarCaravana(std::make_unique<CaravanaBarbara>(gerarIDCaravana(), i, j));
+                }
+            }
+        }
+
+
+
+
         // Ler parâmetros adicionais
         std::string str1;
         ficheiro >> str1 >> moedas;
@@ -61,6 +84,14 @@ const std::vector<std::unique_ptr<Caravana>>& Mapa::getCaravanas() const {
     return caravanas;
 }
 
+void Mapa::listarCaravanas() const {
+    for (const auto& caravana : caravanas) {
+        std::cout << "ID: " << caravana->getId()
+                  << ", Tipo: " << caravana->getTipo()
+                  << ", Posição: (" << caravana->getLinha() << ", " << caravana->getColuna() << ")"
+                  << std::endl;
+    }
+}
 
 int Mapa::calcularIndice(int linha, int coluna) const {
     return linha * colunas + coluna;
@@ -91,11 +122,16 @@ char Mapa::obterGrid(int linha, int coluna) const {
 void Mapa::imprimirMapa() const {
     for (int i = 0; i < linhas; ++i) {
         for (int j = 0; j < colunas; ++j) {
-            std::cout << grid[calcularIndice(i, j)];
+            // Acessa o caractere na posição (i, j) do grid
+            std::cout << grid[i * colunas + j];  // Acesso direto usando a fórmula de índice
         }
-        std::cout << std::endl;
+        std::cout << std::endl;  // Nova linha após cada linha do grid
     }
 }
+
+
+
+
 
 bool Mapa::reduzirMoedas(int quantidade) {
     if (moedas >= quantidade) {
@@ -117,12 +153,13 @@ void Mapa::adicionarCaravana(std::unique_ptr<Caravana> caravana) {
     if (!posicaoValida(caravana->getLinha(), caravana->getColuna())) {
         throw std::out_of_range("Posição inválida para adicionar a caravana.");
     }
-
+    /*
     // Usar o ID da caravana como símbolo no grid
     int id = caravana->getId();
+
     char simbolo = (id < 10) ? '0' + id : '*'; // Simbolo para IDs > 9
     atualizarGrid(caravana->getLinha(), caravana->getColuna(), simbolo);
-
+    */
     caravanas.push_back(std::move(caravana)); // Adiciona a caravana à lista
 }
 
