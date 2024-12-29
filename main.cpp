@@ -162,6 +162,7 @@ int main() {
                         if (!var2.empty()) { // Verifica se o valor da coluna não está vazio
                             y = std::stoi(var2); // Converte a string para int
                             std::cout << "Comando: " << comando << ", Linha: " << x << ", Coluna: " << y << std::endl;
+
                         } else {
                             std::cout << "Erro: O valor da Coluna não fornecido." << std::endl; // Mensagem de erro se o valor da coluna estiver vazio
                         }
@@ -181,6 +182,7 @@ int main() {
                     moedas = std::stoi(var1); // Converte a string para int
                     if (!var1.empty()) { // Verifica se o número de moedas não está vazio
                         std::cout << "Comando: " << comando << ", Moedas: " << moedas << std::endl;
+                        mapa->addMoedas(moedas);
                     } else {
                         std::cout << "Erro: Nº de Moedas não fornecido." << std::endl; // Mensagem de erro se o número de moedas estiver vazio
                     }

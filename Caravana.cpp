@@ -40,6 +40,19 @@ void Caravana::consumirAgua(int quantidade) {
     }
 }
 
+int Caravana::calcularConsumoAguaComercio() const {
+    if (tripulantes == 0) return 0;
+    if (tripulantes < 10) return 1;
+    return 2;
+}
+
+int Caravana::calcularConsumoAguaMilitar() const {
+    if (tripulantes < 20) return 1;
+    return 3;
+}
+
+
+
 void Caravana::adicionarTripulantes(int quantidade) {
     tripulantes += quantidade;
 }
@@ -50,7 +63,7 @@ void Caravana::removerTripulantes(int quantidade) {
 
 // ================== Caravana de Comércio ==================
 CaravanaComercio::CaravanaComercio(int id, int linha, int coluna)
-        : Caravana(id, linha, coluna, 40, 200, 10) {}
+        : Caravana(id, linha, coluna, 40, 200, 20) {}
 
 bool CaravanaComercio::estaSemAgua() const { return aguaAtual == 0; }
 

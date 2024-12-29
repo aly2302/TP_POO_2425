@@ -49,6 +49,9 @@ public:
     virtual bool estaSemAgua() const = 0;
     virtual bool estaCheia() const = 0;
     virtual void executarComportamento(Mapa& mapa) = 0;
+
+    int calcularConsumoAguaComercio() const;
+    int calcularConsumoAguaMilitar() const;
 };
 
 // Caravana de Comércio

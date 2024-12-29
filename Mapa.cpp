@@ -198,6 +198,7 @@ bool Mapa::reduzirMoedas(int quantidade) {
 bool Mapa::addMoedas(int quantidade) {
     if (moedas >= quantidade) {
         moedas += quantidade;
+        std::cout << "O utilizador tem agora: " << moedas << " moedas." << std::endl;
         return true;
     }
     return false;
@@ -279,11 +280,20 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
                 caravana->moverPara(novaLinha, novaColuna);
                 char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
                 atualizarGrid(novaLinha, novaColuna, simbolo);
-            }else if(obterGrid(novaLinha, novaColuna) != '+'){
+            }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) != '!'){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
+                if(caravana->getTipo() == "Comercio"){
+                    caravana->consumirAgua(caravana->calcularConsumoAguaComercio());
+                }else if (caravana->getTipo() == "Militar"){
+                    caravana->consumirAgua(caravana->calcularConsumoAguaMilitar());
+                }
                 char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
                 atualizarGrid(novaLinha, novaColuna, simbolo);
+            }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) == '!'){
+                atualizarGrid(linhaAtual, colunaAtual, '.');
+                caravana->moverPara(novaLinha, novaColuna);
+                atualizarGrid(novaLinha, novaColuna, '!');
             }
             return;
         }
@@ -365,6 +375,47 @@ void Mapa::processarMovimentosAutomaticos() {
     }
 }
 
+void Mapa::processarCombates() {
+    for (size_t i = 0; i < caravanas.size(); ++i) {
+        for (size_t j = i + 1; j < caravanas.size(); ++j) {
+            auto& caravanaA = caravanas[i];
+            auto& caravanaB = caravanas[j];
+
+            if (caravanaA && caravanaB &&
+                estaAdjacente(caravanaA->getLinha(), caravanaA->getColuna(),
+                              caravanaB->getLinha(), caravanaB->getColuna()) &&
+                caravanaA->getTipo() != caravanaB->getTipo()) {
+
+                int sorteioA = rand() % (caravanaA->getTripulantes() + 1);
+                int sorteioB = rand() % (caravanaB->getTripulantes() + 1);
+
+                if (sorteioA > sorteioB) {
+                    resolverCombate(*caravanaA, *caravanaB);
+                } else if (sorteioB > sorteioA) {
+                    resolverCombate(*caravanaB, *caravanaA);
+                }
+            }
+        }
+    }
+}
+
+void Mapa::resolverCombate(Caravana& vencedora, Caravana& perdedora) {
+    int tripulantesVencedor = vencedora.getTripulantes();
+    int perdaVencedor = tripulantesVencedor * 0.2;
+    int perdaPerdedor = perdaVencedor * 2;
+
+    vencedora.removerTripulantes(perdaVencedor);
+    perdedora.removerTripulantes(perdaPerdedor);
+
+    if (perdedora.getTripulantes() <= 0) {
+        vencedora.adicionarCarga(perdedora.getAguaAtual());
+        caravanas.erase(std::remove_if(caravanas.begin(), caravanas.end(),
+                                       [&perdedora](const std::unique_ptr<Caravana>& c) { return c.get() == &perdedora; }),
+                        caravanas.end());
+    }
+}
+
+
 void Mapa::executarInstantes(int n) {
     if (n <= 0) {
         std::cout << "Erro: Número de instantes deve ser maior que 0.\n";
@@ -374,7 +425,7 @@ void Mapa::executarInstantes(int n) {
     for (int i = 0; i < n; ++i) {
         std::cout << "Instante " << (i + 1) << "/" << n << ":\n";
         processarMovimentosAutomaticos(); // Move as caravanas automáticas
-        imprimirMapa();                  // Exibe o mapa após os movimentos
+        processarCombates();
     }
 }
 
@@ -585,9 +636,7 @@ Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
 
 
 
-void Mapa::adicionarCaravanaBarbaraAleatoria() {
-    int linha = std::rand() % linhas;
-    int coluna = std::rand() % colunas;
+void Mapa::adicionarCaravanaBarbara(int linha, int coluna) {
 
     // Verificar se a posição está livre para adicionar uma caravana bárbara
     if (obterGrid(linha, coluna) == '.') {
