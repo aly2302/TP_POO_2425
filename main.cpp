@@ -53,17 +53,6 @@ int main() {
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
                     }
-                } else if (comando == "prox") { // Verifica se o comando é "prox" (prox <n>)
-                    int instances = 1; // Valor padrão
-                    if (iss >> var1) { // Tenta extrair um valor extra
-                        instances = std::stoi(var1); // Converte a string para int
-                        if (instances <= 0) { // Verifica se o valor é menor or igual a 0
-                            std::cout << "Erro: O valor de 'n' deve ser maior que 0." << std::endl;
-                        }
-                        std::cout << "Comando: " << comando << ", n: " << instances << std::endl;
-                    } else {
-                        std::cout << "Comando: " << comando << ", n: " << instances << std::endl; // Se não houver valor extra, usa o padrão
-                    }
                 }else if (comando == "comprac") { // Verifica se o comando é "comprac" (comprac <C> <T>)
                     iss >> var1; // Extrai a cidade
                     if (!var1.empty()) { // Verifica se o nome da cidade não está vazio
