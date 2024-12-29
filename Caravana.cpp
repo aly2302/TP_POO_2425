@@ -72,9 +72,20 @@ bool CaravanaComercio::estaCheia() const { return cargaAtual >= capacidadeCarga;
 void CaravanaComercio::executarComportamento(Mapa& mapa) {
     // Exemplo: Mover para o primeiro item próximo
     auto item = mapa.encontrarItemProximo(linha, coluna, 2);
-    if (item && !estaCheia()) {
-        moverPara(item->linha, item->coluna);
-        adicionarCarga(item->peso);
+    // Calcular direção do próximo passo
+    int deltaLinha = item->linha - linha;
+    int deltaColuna = item->coluna - coluna;
+
+    // Normalizar o movimento para um único passo
+    int proximaLinha = linha + (deltaLinha == 0 ? 0 : (deltaLinha > 0 ? 1 : -1));
+    int proximaColuna = coluna + (deltaColuna == 0 ? 0 : (deltaColuna > 0 ? 1 : -1));
+
+    // Fazer o movimento
+    moverPara(proximaLinha, proximaColuna);
+
+    // Verificar se chegou ao item após o movimento
+    if (proximaLinha == item->linha && proximaColuna == item->coluna) {
+        adicionarCarga(1);
         mapa.removerItem(item->linha, item->coluna);
     }
     consumirAgua(2);
@@ -139,20 +150,23 @@ bool CaravanaSecreta::estaSemAgua() const { return aguaAtual == 0; }
 bool CaravanaSecreta::estaCheia() const { return cargaAtual >= capacidadeCarga; }
 
 void CaravanaSecreta::executarComportamento(Mapa& mapa) {
-    // Buscar itens no raio de 3 posições
+    // Exemplo: Mover para o primeiro item próximo
     auto item = mapa.encontrarItemProximo(linha, coluna, 3);
-    if (item && !estaCheia()) {
-        // Move-se para o item, mesmo que esteja próximo de bárbaros
-        moverPara(item->linha, item->coluna);
-        adicionarCarga(item->peso);
-        mapa.removerItem(item->linha, item->coluna);
+    // Calcular direção do próximo passo
+    int deltaLinha = item->linha - linha;
+    int deltaColuna = item->coluna - coluna;
 
-        std::cout << "Caravana Secreta coletou um item na posição ("
-                  << item->linha << ", " << item->coluna << ")." << std::endl;
-    } else {
-        // Movimento aleatório se nenhum item for encontrado
-        auto novaPosicao = mapa.gerarMovimentoAleatorio(linha, coluna);
-        moverPara(novaPosicao.first, novaPosicao.second);
+    // Normalizar o movimento para um único passo
+    int proximaLinha = linha + (deltaLinha == 0 ? 0 : (deltaLinha > 0 ? 1 : -1));
+    int proximaColuna = coluna + (deltaColuna == 0 ? 0 : (deltaColuna > 0 ? 1 : -1));
+
+    // Fazer o movimento
+    moverPara(proximaLinha, proximaColuna);
+
+    // Verificar se chegou ao item após o movimento
+    if (proximaLinha == item->linha && proximaColuna == item->coluna) {
+        adicionarCarga(1);
+        mapa.removerItem(item->linha, item->coluna);
     }
 
     // Consumir água no final do turno

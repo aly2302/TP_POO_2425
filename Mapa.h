@@ -94,6 +94,12 @@ public:
 
     void processarCombates();
     void resolverCombate(Caravana& vencedora, Caravana& perdedora);
+
+    void gerarItensAleatorios();
+    void processarItens();
+    void verificarItensAdjacentes(Caravana& caravana);
+    void removerItem(int linha, int coluna) const;
+
 };
 
 #endif // TP_POO_2425_MAPA_H

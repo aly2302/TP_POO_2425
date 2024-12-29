@@ -162,6 +162,7 @@ int main() {
                         if (!var2.empty()) { // Verifica se o valor da coluna não está vazio
                             y = std::stoi(var2); // Converte a string para int
                             std::cout << "Comando: " << comando << ", Linha: " << x << ", Coluna: " << y << std::endl;
+                            mapa->adicionarCaravanaBarbara(x, y);
 
                         } else {
                             std::cout << "Erro: O valor da Coluna não fornecido." << std::endl; // Mensagem de erro se o valor da coluna estiver vazio

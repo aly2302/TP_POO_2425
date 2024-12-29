@@ -282,14 +282,14 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
                 }
             }
 
-            if(vaicidade && obterGrid(novaLinha, novaColuna) != '+'){
+            if(vaicidade){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
-            }else if(estacidade){
+            }else if(estacidade && obterGrid(novaLinha, novaColuna) != '+'){
                 caravana->moverPara(novaLinha, novaColuna);
                 char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
                 atualizarGrid(novaLinha, novaColuna, simbolo);
-            }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) != '!'){
+            }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) != '!' && caravana->getTipo() != "Barbara"){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
                 if(caravana->getTipo() == "Comercio"){
@@ -299,6 +299,10 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
                 }
                 char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
                 atualizarGrid(novaLinha, novaColuna, simbolo);
+            }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) != '!' && caravana->getTipo() == "Barbara"){
+                atualizarGrid(linhaAtual, colunaAtual, '.');
+                caravana->moverPara(novaLinha, novaColuna);
+                atualizarGrid(novaLinha, novaColuna, '!');
             }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) == '!'){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
@@ -393,7 +397,8 @@ void Mapa::processarCombates() {
             if (caravanaA && caravanaB &&
                 estaAdjacente(caravanaA->getLinha(), caravanaA->getColuna(),
                               caravanaB->getLinha(), caravanaB->getColuna()) &&
-                caravanaA->getTipo() != caravanaB->getTipo()) {
+                caravanaA->getTipo() != caravanaB->getTipo() &&
+                (caravanaA->getTipo() == "Barbara" || caravanaB->getTipo() == "Barbara")) {
 
                 int sorteioA = rand() % (caravanaA->getTripulantes() + 1);
                 int sorteioB = rand() % (caravanaB->getTripulantes() + 1);
@@ -422,6 +427,8 @@ void Mapa::resolverCombate(Caravana& vencedora, Caravana& perdedora) {
         if(vencedora.getTipo() == "Barbara"){
             atualizarGrid(vencedora.getLinha(), vencedora.getColuna(), '!');
         }
+
+        desativarAutoMover(perdedora.getId());
         caravanas.erase(std::remove_if(caravanas.begin(),
                                        caravanas.end(),
                                        [&perdedora](const std::unique_ptr<Caravana>& c)
@@ -440,6 +447,13 @@ void Mapa::executarInstantes(int n) {
 
     for (int i = 0; i < n; ++i) {
         std::cout << "Instante " << (i + 1) << "/" << n << ":\n";
+        processarItens();
+
+        // Gera novos itens periodicamente
+        if (i % instantesEntreNovosItens == 0) {
+            gerarItensAleatorios();
+        }
+
         processarMovimentosAutomaticos(); // Move as caravanas automáticas
         processarCombates();
     }
@@ -601,7 +615,8 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
 
 bool Mapa::estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const {
     return (linha1 == linha2 && std::abs(coluna1 - coluna2) == 1) || // Mesma linha, colunas adjacentes
-           (coluna1 == coluna2 && std::abs(linha1 - linha2) == 1);   // Mesma coluna, linhas adjacentes
+           (coluna1 == coluna2 && std::abs(linha1 - linha2) == 1) ||   // Mesma coluna, linhas adjacentes
+           (std::abs(linha1 - linha2) == 1 && std::abs(coluna1 - coluna2) == 1); // Diagonal adjacente
 }
 
 std::vector<std::pair<int, int>> Mapa::encontrarCaravanasAdjacentes(int linha, int coluna) const {
@@ -619,15 +634,6 @@ std::vector<std::pair<int, int>> Mapa::encontrarCaravanasAdjacentes(int linha, i
 
 
 
-
-
-void Mapa::adicionarItem(int linha, int coluna) {
-    if (itens.size() < maxItens && posicaoValida(linha, coluna)) {
-        Item item{linha, coluna, 'I', duracaoItem};
-        itens.push_back(item);
-        std::cout << "Novo item gerado em (" << linha << ", " << coluna << ")." << std::endl;
-    }
-}
 
 Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
     for (auto& item : itens) {
@@ -656,7 +662,9 @@ void Mapa::adicionarCaravanaBarbara(int linha, int coluna) {
 
     // Verificar se a posição está livre para adicionar uma caravana bárbara
     if (obterGrid(linha, coluna) == '.') {
+        atualizarGrid(linha,coluna, '!');
         adicionarCaravana(std::make_unique<CaravanaBarbara>(gerarIDCaravana(), linha, coluna));
+
         std::cout << "Nova caravana bárbara gerada em (" << linha << ", " << coluna << ")." << std::endl;
     }
 }
@@ -787,3 +795,53 @@ void Mapa::listagem_precos() const {
     std::cout << "Preço de Compra da Mercadoria: " << precoCompraMercadoria << std::endl;
     std::cout << "Preço de Venda da Mercadoria: " << precoVendaMercadoria << std::endl;
 }
+
+
+void Mapa::gerarItensAleatorios() {
+    while (itens.size() < maxItens) {
+        int linha = rand() % linhas;
+        int coluna = rand() % colunas;
+
+        // Verificar se a posição está vazia
+        if (posicaoValida(linha, coluna) && grid[calcularIndice(linha, coluna)] == '.') {
+            Item::Tipo tipo = static_cast<Item::Tipo>(rand() % 5); // Escolhe tipo aleatório
+            itens.emplace_back(linha, coluna, tipo, 20);          // Configura duração de 20 instantes
+            grid[calcularIndice(linha, coluna)] = 'I';           // Marca item no grid
+            std::cout << "Novo item (" << itens.back().getNomeTipo()
+                      << ") gerado em (" << linha << ", " << coluna << ").\n";
+        }
+    }
+}
+
+
+void Mapa::processarItens() {
+    for (auto it = itens.begin(); it != itens.end();) {
+        it->duracao--;
+
+        // Remover itens com duração expirada
+        if (it->duracao <= 0) {
+            std::cout << "Item (" << it->getNomeTipo() << ") em (" << it->linha << ", "
+                      << it->coluna << ") desapareceu.\n";
+            grid[calcularIndice(it->linha, it->coluna)] = '.'; // Limpa o grid
+            it = itens.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void Mapa::verificarItensAdjacentes(Caravana& caravana) {
+    for (auto it = itens.begin(); it != itens.end();) {
+        int distLinha = abs(it->linha - caravana.getLinha());
+        int distColuna = abs(it->coluna - caravana.getColuna());
+
+        if ((distLinha == 1 && distColuna == 0) || (distLinha == 0 && distColuna == 1)) {
+            it->aplicarEfeito(caravana, *this);
+            grid[calcularIndice(it->linha, it->coluna)] = '.'; // Limpa o grid
+            it = itens.erase(it); // Remove o item
+        } else {
+            ++it;
+        }
+    }
+}
+
