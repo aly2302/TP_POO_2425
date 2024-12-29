@@ -54,7 +54,10 @@ public:
     void adicionarCaravanaBarbaraAleatoria();
     Caravana* encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio) const;
 
-    void autoMoverCaravana(int idCaravana);
+    void ativarAutoMover(int idCaravana);
+    void desativarAutoMover(int idCaravana);
+    void processarMovimentosAutomaticos();
+    void executarInstantes(int n);
 
     void adicionarItem(int linha, int coluna);
     void removerItem(int linha, int coluna);

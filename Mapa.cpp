@@ -8,6 +8,8 @@
 #include <ctime>
 #include <cmath>
 #include <algorithm>
+#include <unordered_set>
+
 
 Mapa::Mapa(const std::string& nomeFicheiro, Buffer* buffer) : buffer(buffer) {
     std::ifstream ficheiro(nomeFicheiro);
@@ -241,14 +243,28 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
             }
 
             bool estacidade = false;
+            bool vaicidade = false;
 
             for (const auto& cidade : cidades) {
                 if (cidade->getLinha() == novaLinha && cidade->getColuna() == novaColuna) {
+                    vaicidade = true;
+                }
+            }
+
+            for (const auto& cidade : cidades) {
+                if (cidade->getLinha() == linhaAtual && cidade->getColuna() == colunaAtual) {
                     estacidade = true;
                 }
             }
 
-            if(!estacidade && obterGrid(novaLinha, novaColuna) != '+'){
+            if(vaicidade && obterGrid(novaLinha, novaColuna) != '+'){
+                atualizarGrid(linhaAtual, colunaAtual, '.');
+                caravana->moverPara(novaLinha, novaColuna);
+            }else if(estacidade){
+                caravana->moverPara(novaLinha, novaColuna);
+                char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
+                atualizarGrid(novaLinha, novaColuna, simbolo);
+            }else if(obterGrid(novaLinha, novaColuna) != '+'){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
                 char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
@@ -294,23 +310,57 @@ std::pair<int, int> Mapa::gerarMovimentoAleatorio(int linha, int coluna) const {
     return {linha, coluna}; // Return original position if invalid move
 }
 
-void Mapa::autoMoverCaravana(int idCaravana) {
-    for (auto& caravana : caravanas) {
-        if (caravana->getId() == idCaravana) {
-            static const std::vector<std::string> direcoes = {"D", "E", "C", "B", "CE", "CD", "BE", "BD"};
-            std::string direcaoAleatoria = direcoes[rand() % direcoes.size()];
 
-            try {
-                moverCaravana(idCaravana, direcaoAleatoria);
-                std::cout << "Caravana " << idCaravana << " movida automaticamente na direção " << direcaoAleatoria << "." << std::endl;
-            } catch (const std::exception& e) {
-                std::cout << "Erro ao mover automaticamente a caravana " << idCaravana << ": " << e.what() << std::endl;
+
+std::unordered_set<int> caravanasAuto;
+void Mapa::ativarAutoMover(int idCaravana) {
+    for (const auto& caravana : caravanas) {
+        if (caravana->getId() == idCaravana) {
+            if (caravanasAuto.find(idCaravana) == caravanasAuto.end()) {
+                caravanasAuto.insert(idCaravana);
+                std::cout << "Caravana " << idCaravana << " ativada para movimento automático.\n";
+            } else {
+                std::cout << "Caravana " << idCaravana << " já está em movimento automático.\n";
             }
             return;
         }
     }
-    std::cerr << "Erro: Caravana com ID " << idCaravana << " não encontrada." << std::endl;
+    std::cout << "Erro: Caravana com ID " << idCaravana << " não encontrada.\n";
 }
+
+void Mapa::desativarAutoMover(int idCaravana) {
+    if (caravanasAuto.erase(idCaravana)) {
+        std::cout << "Caravana " << idCaravana << " parou o movimento automático.\n";
+    } else {
+        std::cout << "Caravana " << idCaravana << " não está em movimento automático.\n";
+    }
+}
+
+void Mapa::processarMovimentosAutomaticos() {
+    for (int idCaravana : caravanasAuto) {
+        try {
+            static const std::vector<std::string> direcoes = {"D", "E", "C", "B", "CE", "CD", "BE", "BD"};
+            std::string direcaoAleatoria = direcoes[rand() % direcoes.size()];
+            moverCaravana(idCaravana, direcaoAleatoria);
+        } catch (const std::exception& e) {
+            std::cout << "Erro ao mover automaticamente a caravana " << idCaravana << ": " << e.what() << std::endl;
+        }
+    }
+}
+
+void Mapa::executarInstantes(int n) {
+    if (n <= 0) {
+        std::cout << "Erro: Número de instantes deve ser maior que 0.\n";
+        return;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        std::cout << "Instante " << (i + 1) << "/" << n << ":\n";
+        processarMovimentosAutomaticos(); // Move as caravanas automáticas
+        imprimirMapa();                  // Exibe o mapa após os movimentos
+    }
+}
+
 
 
 void Mapa::comprarMercadoria(int idCaravana, int quantidade) {

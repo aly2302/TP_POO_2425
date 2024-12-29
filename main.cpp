@@ -20,7 +20,10 @@ int main() {
         bool executando = true;
         bool segunda_fase = false;
         while (executando) {
-            //exibirMenu();
+
+
+
+
             std::cout << "Escolha um comando: ";
             std::getline(std::cin, input); // Lê a linha toda
 
@@ -53,18 +56,7 @@ int main() {
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
                     }
-                } else if (comando == "prox") { // Verifica se o comando é "prox" (prox <n>)
-                    int instances = 1; // Valor padrão
-                    if (iss >> var1) { // Tenta extrair um valor extra
-                        instances = std::stoi(var1); // Converte a string para int
-                        if (instances <= 0) { // Verifica se o valor é menor or igual a 0
-                            std::cout << "Erro: O valor de 'n' deve ser maior que 0." << std::endl;
-                        }
-                        std::cout << "Comando: " << comando << ", n: " << instances << std::endl;
-                    } else {
-                        std::cout << "Comando: " << comando << ", n: " << instances << std::endl; // Se não houver valor extra, usa o padrão
-                    }
-                }else if (comando == "comprac") { // Verifica se o comando é "comprac" (comprac <C> <T>)
+                } else if (comando == "comprac") { // Verifica se o comando é "comprac" (comprac <C> <T>)
                     iss >> var1; // Extrai a cidade
                     if (!var1.empty()) { // Verifica se o nome da cidade não está vazio
                         iss >> var2; // Extrai a Caravana
@@ -138,25 +130,31 @@ int main() {
                     } else {
                         std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
                     }
-                }else if  // Verifica se o comando é "auto" (auto <N>)
-                    (comando == "auto") { // Implementação do comando "auto <N>"
+                } else if (comando == "auto") {
                     int idCaravana;
-                    iss >> idCaravana;
-                    if (!iss.fail()) {
-                        mapa->autoMoverCaravana(idCaravana); // Apenas delega para a função no Mapa
+                    if (iss >> idCaravana && mapa) {
+                        mapa->ativarAutoMover(idCaravana);
                     } else {
-                        std::cout << "Erro: ID da caravana não fornecido ou inválido." << std::endl;
+                        std::cout << "Erro: ID da caravana inválido ou mapa não configurado.\n";
                     }
-                }else if (comando == "stop") { // Verifica se o comando é "stop" (stop <N>)
-                    int n_caravana = 0;
-                    iss >> var1; // Extrai o número da caravana
-                    if (!var1.empty()) { // Verifica se o número da caravana não está vazio
-                        n_caravana = std::stoi(var1); // Converte a string para int
-                        std::cout << "Comando: " << comando << ", Nº da Caravana: " << n_caravana << std::endl;
+                } else if (comando == "stop") {
+                    int idCaravana;
+                    if (iss >> idCaravana && mapa) {
+                        mapa->desativarAutoMover(idCaravana);
                     } else {
-                        std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
+                        std::cout << "Erro: ID da caravana inválido ou mapa não configurado.\n";
                     }
-                }else if (comando == "barbaro") { // Verifica se o comando é "barbaro" (barbaro <l> <c>)
+                } else if (comando == "prox") {
+                    int instantes = 1; // Valor padrão
+                    if (iss >> instantes && instantes > 0 && mapa) {
+                        mapa->executarInstantes(instantes);
+                    } else if (mapa) {
+                        mapa->executarInstantes(instantes); // Avança um instante por padrão
+                    } else {
+                        std::cout << "Erro: Valor de instantes inválido ou mapa não configurado.\n";
+                    }
+                }
+                else if (comando == "barbaro") { // Verifica se o comando é "barbaro" (barbaro <l> <c>)
                     int x = 0;
                     int y = 0;
                     iss >> var1; // Extrai a linha
