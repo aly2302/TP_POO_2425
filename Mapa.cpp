@@ -270,6 +270,25 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
             bool estacidade = false;
             bool vaicidade = false;
 
+            char simbolo_grid;
+
+            if (caravana->getTipo() == "Comercio") {
+                simbolo_grid = 'C';
+            } else if (caravana->getTipo() == "Militar") {
+                simbolo_grid = 'M';
+            } else if (caravana->getTipo() == "Secreta") {
+                simbolo_grid = 'S';
+            } else if (caravana->getTipo() == "Barbara") {
+                simbolo_grid = '!'; // Exemplo de símbolo especial para Bárbara
+            } else {
+                simbolo_grid = '*'; // Padrão genérico
+            }
+
+            // Ajustar para IDs pequenos (0 a 9)
+            if (id >= 0 && id < 10) {
+                simbolo_grid = '0' + id; // Representar o ID diretamente como número
+            }
+
             for (const auto& cidade : cidades) {
                 if (cidade->getLinha() == novaLinha && cidade->getColuna() == novaColuna) {
                     vaicidade = true;
@@ -287,8 +306,7 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
                 caravana->moverPara(novaLinha, novaColuna);
             }else if(estacidade && obterGrid(novaLinha, novaColuna) != '+'){
                 caravana->moverPara(novaLinha, novaColuna);
-                char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
-                atualizarGrid(novaLinha, novaColuna, simbolo);
+                atualizarGrid(novaLinha, novaColuna, simbolo_grid);
             }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) != '!' && caravana->getTipo() != "Barbara"){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
@@ -297,8 +315,7 @@ void Mapa::moverCaravana(int id, const std::string& direcao) {
                 }else if (caravana->getTipo() == "Militar"){
                     caravana->consumirAgua(caravana->calcularConsumoAguaMilitar());
                 }
-                char simbolo = (id < 10) ? '0' + id : '*'; // Representar IDs menores que 10 como números
-                atualizarGrid(novaLinha, novaColuna, simbolo);
+                atualizarGrid(novaLinha, novaColuna, simbolo_grid);
             }else if(obterGrid(novaLinha, novaColuna) != '+' && obterGrid(linhaAtual, colunaAtual) != '!' && caravana->getTipo() == "Barbara"){
                 atualizarGrid(linhaAtual, colunaAtual, '.');
                 caravana->moverPara(novaLinha, novaColuna);
