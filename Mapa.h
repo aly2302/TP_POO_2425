@@ -48,7 +48,8 @@ public:
 
     void adicionarCaravana(std::unique_ptr<Caravana> caravana);
     void listarCaravanas() const;
-    void moverCaravana(int id, int novaLinha, int novaColuna);
+    void listarCaravana(int id) const;
+    void moverCaravana(int id, const std::string& direcao);
     void removerCaravana(int id);
     void adicionarCaravanaBarbaraAleatoria();
     Caravana* encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio) const;
@@ -82,6 +83,7 @@ public:
 
     void adicionarCidade(std::unique_ptr<Cidade> cidade);
     void listarCidades() const;
+    void listarCidade(const std::string& nome) const;
 };
 
 #endif // TP_POO_2425_MAPA_H

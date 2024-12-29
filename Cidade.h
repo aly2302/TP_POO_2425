@@ -37,7 +37,7 @@ public:
     void inicializarCaravanas();
 
     // Método para comprar uma caravana
-    bool comprarCaravana(char tipo);
+    bool comprarCaravana(const std::string& tipo);
 
     // Método para comprar Tripulantes
     void comprarTripulantes(int idCaravana, int quantidade) const;

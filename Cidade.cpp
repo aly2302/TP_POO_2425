@@ -20,23 +20,18 @@ void Cidade::inicializarCaravanas() {
 
 
 // Método para comprar uma caravana
-bool Cidade::comprarCaravana(char tipo) {
+bool Cidade::comprarCaravana(const std::string& tipo) {
     std::string tipoCaravana;
 
-    // Traduzir o caractere para o tipo correspondente
-    switch (tipo) {
-        case 'C':
-            tipoCaravana = "Comercio";
-            break;
-        case 'M':
-            tipoCaravana = "Militar";
-            break;
-        case 'S':
-            tipoCaravana = "Secreta";
-            break;
-        default:
-            std::cout << "Tipo de caravana inválido. Use C, M ou S." << std::endl;
-            return false;
+    if (tipo == "C") {
+        tipoCaravana = "Comercio";
+    } else if (tipo == "M") {
+        tipoCaravana = "Militar";
+    } else if (tipo == "S") {
+        tipoCaravana = "Secreta";
+    } else {
+        std::cout << "Tipo de caravana inválido. Use C, M ou S." << std::endl;
+        return false;
     }
 
     // Procurar no vetor uma caravana do tipo especificado

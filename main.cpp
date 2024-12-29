@@ -45,7 +45,6 @@ int main() {
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
                         std::cout << "Comando: " << comando << ", Nome do Ficheiro: " << nomeFicheiro << std::endl;
                         mapa = new Mapa(nomeFicheiro, &buffer); // Cria um objeto Mapa com o nome do ficheiro
-                        mapa->imprimirMapa();
                         segunda_fase = true;
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
@@ -58,7 +57,6 @@ int main() {
                     std::cout << "Comando desconhecido." << std::endl; // Mensagem de erro se o comando não for reconhecido
                 }
             }else{
-
                 if (comando == "exec") { // Verifica se o comando é "config" (exec <nomeFicheiro>)
                     iss >> nomeFicheiro; // Extrai o nome do ficheiro
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
@@ -90,10 +88,12 @@ int main() {
                     }
                 }else if (comando == "precos") { // Verifica se o comando é "precos"
                     std::cout << "Comando: " << comando << std::endl;
+                    mapa->listagem_precos();
                 }else if (comando == "cidade") { // Verifica se o comando é "cidade" (cidade <C>)
                     iss >> var1; // Extrai a cidade
                     if (!var1.empty()) { // Verifica se o nome da cidade não está vazio
                         std::cout << "Comando: " << comando << ", Cidade: " << var1 << std::endl;
+                        mapa->listarCidade(var1);
                     } else {
                         std::cout << "Erro: Nome da Cidade não fornecido." << std::endl; // Mensagem de erro se o nome da cidade estiver vazio
                     }
@@ -103,6 +103,8 @@ int main() {
                     if (!var1.empty()) { // Verifica se o nome da cidade não está vazio
                         n_caravana = std::stoi(var1); // Converte a string para int
                         std::cout << "Comando: " << comando << ", Nº da caravana: " << n_caravana << std::endl;
+                        mapa->listarCaravana(n_caravana);
+
                     } else {
                         std::cout << "Erro: Número da Caravana não fornecido." << std::endl; // Mensagem de erro se o nome da cidade estiver vazio
                     }
@@ -116,6 +118,7 @@ int main() {
                         n_toneladas = std::stoi(var2); // Converte a string para int
                         if (!var2.empty()) { // Verifica se o valor das Toneladas não está vazio
                             std::cout << "Comando: " << comando << ", Número da Caravana: " << n_caravana << ", Toneladas: " << n_toneladas << std::endl;
+                            mapa->comprarMercadoria(n_caravana,n_toneladas);
                         }else {
                             std::cout << "Erro: Nº de Toneladas não fornecido." << std::endl; // Mensagem de erro se o nº de Toneladas estiver vazio
                         }
@@ -128,6 +131,7 @@ int main() {
                     if (!var1.empty()) { // Verifica se o número da caravana não está vazio
                         n_caravana = std::stoi(var1); // Converte a string para int
                         std::cout << "Comando: " << comando << ", Nº da Caravana: " << n_caravana << std::endl;
+                        mapa->venderMercadoria(n_caravana);
                     } else {
                         std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
                     }
@@ -139,6 +143,7 @@ int main() {
                         iss >> var2; // Extrai a posicao
                         if (!var2.empty()) { // Verifica se a posição não está vazio
                             std::cout << "Comando: " << comando << ", Número da Caravana: " << n_caravana << ", Posição: " << var2 << std::endl;
+                            mapa->moverCaravana(n_caravana, var2);
                         }else {
                             std::cout << "Erro: Posição não fornecido." << std::endl; // Mensagem de erro se a posição estiver vazio
                         }
@@ -265,6 +270,8 @@ int main() {
                     std::cout << "Comando desconhecido." << std::endl; // Mensagem de erro se o comando não for reconhecido
                 }
             }
+
+            mapa->imprimirMapa();
 
             /* switch (comando) {
                  case 1: {
