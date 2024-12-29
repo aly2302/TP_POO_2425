@@ -168,27 +168,12 @@ int main() {
                     } else {
                         std::cout << "Erro: O valor da Linha não fornecido." << std::endl; // Mensagem de erro se o valor da linha estiver vazio
                     }
-                }else if (comando == "areia") { // Verifica se o comando é "areia" (areia <l> <c> <r>)
-                    int x = 0;
-                    int y = 0;
-                    int r = 0;
-                    iss >> var1; // Extrai a linha
-                    if (!var1.empty()) { // Verifica se o valor da linha não está vazio
-                        x = std::stoi(var1); // Converte a string para int
-                        iss >> var2; // Extrai a coluna
-                        if (!var2.empty()) { // Verifica se o valor da coluna não está vazio
-                            y = std::stoi(var2); // Converte a string para int
-                            iss >> var3; // Extrai o raio
-                            if (!var3.empty()) { // Verifica se o valor do raio não está vazio
-                                std::cout << "Comando: " << comando << ", Linha: " << x << ", Coluna: " << y << ", Raio: " << r << std::endl;
-                            }else{
-                                std::cout << "Erro: O valor do Raio não fornecido." << std::endl; // Mensagem de erro se o valor do raio estiver vazio
-                            }
-                        } else {
-                            std::cout << "Erro: O valor da Coluna não fornecido." << std::endl; // Mensagem de erro se o valor da coluna estiver vazio
-                        }
+                }else if (comando == "areia") {
+                    int linha, coluna, raio;
+                    if (iss >> linha >> coluna >> raio && mapa) {
+                        mapa->criarTempestadeAreia(linha, coluna, raio);
                     } else {
-                        std::cout << "Erro: O valor da Linha não fornecido." << std::endl; // Mensagem de erro se o valor da linha estiver vazio
+                        std::cout << "Erro: Parâmetros inválidos ou mapa não configurado.\n";
                     }
                 }else if (comando == "moedas") { // Verifica se o comando é "moedas" (moedas <N>)
                     int moedas = 0;
