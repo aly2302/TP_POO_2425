@@ -14,4 +14,6 @@ add_executable(TP_POO_2425 main.cpp
         Item.h
         Cidade.h
         Cidade.cpp
+        ExecComandos.h
+        ExecComandos.cpp
 )

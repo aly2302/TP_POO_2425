@@ -9,6 +9,7 @@
 
 class Mapa;
 
+
 // Classe base abstrata para caravanas
 class Caravana {
 protected:

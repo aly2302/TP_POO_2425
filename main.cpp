@@ -1,20 +1,8 @@
 #include "Mapa.h"
+#include "ExecComandos.h"
 #include <iostream>
 #include <sstream>
 
-//testar código
-
-void exibirMenu() {
-    std::cout << "\nComandos disponíveis:" << std::endl;
-    std::cout << "1. Criar caravana de comércio" << std::endl;
-    std::cout << "2. Criar caravana militar" << std::endl;
-    std::cout << "3. Criar caravana secreta" << std::endl;
-    std::cout << "4. Mover caravana" << std::endl;
-    std::cout << "5. Listar cidades" << std::endl;
-    std::cout << "6. Exibir mapa" << std::endl;
-    std::cout << "7. Executar simulação" << std::endl;
-    std::cout << "8. Sair" << std::endl;
-}
 
 int main() {
     try {
@@ -45,7 +33,6 @@ int main() {
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
                         std::cout << "Comando: " << comando << ", Nome do Ficheiro: " << nomeFicheiro << std::endl;
                         mapa = new Mapa(nomeFicheiro, &buffer); // Cria um objeto Mapa com o nome do ficheiro
-                        mapa->imprimirMapa();
                         segunda_fase = true;
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
@@ -58,11 +45,10 @@ int main() {
                     std::cout << "Comando desconhecido." << std::endl; // Mensagem de erro se o comando não for reconhecido
                 }
             }else{
-
                 if (comando == "exec") { // Verifica se o comando é "config" (exec <nomeFicheiro>)
                     iss >> nomeFicheiro; // Extrai o nome do ficheiro
                     if (!nomeFicheiro.empty()) { // Verifica se o nome do ficheiro não está vazio
-                        std::cout << "Comando: " << comando << ", Nome do Ficheiro: " << nomeFicheiro << std::endl;
+                        executarComandosDeFicheiro(nomeFicheiro, mapa, &buffer, segunda_fase);
 
                     } else {
                         std::cout << "Erro: Nome do ficheiro não fornecido." << std::endl; // Mensagem de erro se o nome do ficheiro estiver vazio
@@ -90,10 +76,12 @@ int main() {
                     }
                 }else if (comando == "precos") { // Verifica se o comando é "precos"
                     std::cout << "Comando: " << comando << std::endl;
+                    mapa->listagem_precos();
                 }else if (comando == "cidade") { // Verifica se o comando é "cidade" (cidade <C>)
                     iss >> var1; // Extrai a cidade
                     if (!var1.empty()) { // Verifica se o nome da cidade não está vazio
                         std::cout << "Comando: " << comando << ", Cidade: " << var1 << std::endl;
+                        mapa->listarCidade(var1);
                     } else {
                         std::cout << "Erro: Nome da Cidade não fornecido." << std::endl; // Mensagem de erro se o nome da cidade estiver vazio
                     }
@@ -103,6 +91,8 @@ int main() {
                     if (!var1.empty()) { // Verifica se o nome da cidade não está vazio
                         n_caravana = std::stoi(var1); // Converte a string para int
                         std::cout << "Comando: " << comando << ", Nº da caravana: " << n_caravana << std::endl;
+                        mapa->listarCaravana(n_caravana);
+
                     } else {
                         std::cout << "Erro: Número da Caravana não fornecido." << std::endl; // Mensagem de erro se o nome da cidade estiver vazio
                     }
@@ -116,6 +106,7 @@ int main() {
                         n_toneladas = std::stoi(var2); // Converte a string para int
                         if (!var2.empty()) { // Verifica se o valor das Toneladas não está vazio
                             std::cout << "Comando: " << comando << ", Número da Caravana: " << n_caravana << ", Toneladas: " << n_toneladas << std::endl;
+                            mapa->comprarMercadoria(n_caravana,n_toneladas);
                         }else {
                             std::cout << "Erro: Nº de Toneladas não fornecido." << std::endl; // Mensagem de erro se o nº de Toneladas estiver vazio
                         }
@@ -128,6 +119,7 @@ int main() {
                     if (!var1.empty()) { // Verifica se o número da caravana não está vazio
                         n_caravana = std::stoi(var1); // Converte a string para int
                         std::cout << "Comando: " << comando << ", Nº da Caravana: " << n_caravana << std::endl;
+                        mapa->venderMercadoria(n_caravana);
                     } else {
                         std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
                     }
@@ -139,20 +131,21 @@ int main() {
                         iss >> var2; // Extrai a posicao
                         if (!var2.empty()) { // Verifica se a posição não está vazio
                             std::cout << "Comando: " << comando << ", Número da Caravana: " << n_caravana << ", Posição: " << var2 << std::endl;
+                            mapa->moverCaravana(n_caravana, var2);
                         }else {
                             std::cout << "Erro: Posição não fornecido." << std::endl; // Mensagem de erro se a posição estiver vazio
                         }
                     } else {
                         std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
                     }
-                }else if (comando == "auto") { // Verifica se o comando é "auto" (auto <N>)
-                    int n_caravana = 0;
-                    iss >> var1; // Extrai o número da caravana
-                    if (!var1.empty()) { // Verifica se o número da caravana não está vazio
-                        n_caravana = std::stoi(var1); // Converte a string para int
-                        std::cout << "Comando: " << comando << ", Nº da Caravana: " << n_caravana << std::endl;
+                }else if  // Verifica se o comando é "auto" (auto <N>)
+                    (comando == "auto") { // Implementação do comando "auto <N>"
+                    int idCaravana;
+                    iss >> idCaravana;
+                    if (!iss.fail()) {
+                        mapa->autoMoverCaravana(idCaravana); // Apenas delega para a função no Mapa
                     } else {
-                        std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
+                        std::cout << "Erro: ID da caravana não fornecido ou inválido." << std::endl;
                     }
                 }else if (comando == "stop") { // Verifica se o comando é "stop" (stop <N>)
                     int n_caravana = 0;
@@ -253,6 +246,10 @@ int main() {
                     std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
                     mapa->listarCaravanas();
 
+                }else if (comando == "cidades_list") { // Verifica se o comando é "dels" (dels <nome>)
+                    std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
+                    mapa->listarCidades();
+
                 }else if (comando == "terminar") { // Verifica se o comando é "terminar"
                     executando = false;
                     std::cout << "Terminando o programa..." << std::endl;
@@ -262,53 +259,7 @@ int main() {
                 }
             }
 
-            /* switch (comando) {
-                 case 1: {
-                     int linha, coluna;
-                     std::cout << "Informe a posição inicial (linha coluna): ";
-                     std::cin >> linha >> coluna;
-                     mapa.adicionarCaravana(std::make_unique<CaravanaComercio>(mapa.gerarIDCaravana(), linha, coluna));
-                     break;
-                 }
-                 case 2: {
-                     int linha, coluna;
-                     std::cout << "Informe a posição inicial (linha coluna): ";
-                     std::cin >> linha >> coluna;
-                     mapa.adicionarCaravana(std::make_unique<CaravanaMilitar>(mapa.gerarIDCaravana(), linha, coluna));
-                     break;
-                 }
-                 case 3: {
-                     int linha, coluna;
-                     std::cout << "Informe a posição inicial (linha coluna): ";
-                     std::cin >> linha >> coluna;
-                     mapa.adicionarCaravana(std::make_unique<CaravanaSecreta>(mapa.gerarIDCaravana(), linha, coluna));
-                     break;
-                 }
-                 case 4: {
-                     int id, novaLinha, novaColuna;
-                     std::cout << "Informe o ID da caravana e a nova posição (linha coluna): ";
-                     std::cin >> id >> novaLinha >> novaColuna;
-                     mapa.moverCaravana(id, novaLinha, novaColuna);
-                     break;
-                 }
-                 case 5:
-                     mapa.listarCidades();
-                     break;
-                 case 6:
-                     mapa.imprimirMapa();
-                     break;
-                 case 7:
-                     //mapa.executarSimulacao();
-                     break;
-                 case 8:
-                     executando = false;
-                     std::cout << "Encerrando o programa..." << std::endl;
-                     break;
-                 default:
-                     std::cout << "Comando inválido!" << std::endl;
-                     break;
-             }
-             */
+            mapa->imprimirMapa();
         }
 
     } catch (const std::exception& e) {
