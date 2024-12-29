@@ -41,6 +41,16 @@ void executarComandosDeFicheiro(const std::string& nomeFicheiro, Mapa* mapa, Buf
                 } else {
                     std::cerr << "Erro: Número da caravana não fornecido no comando 'caravana'." << std::endl;
                 }
+            }else if (comando == "compra") { // Verifica se o comando é "compra" (compra <N> <M>)
+                int n_caravana;
+                int n_toneladas;
+                iss >> n_caravana >> n_toneladas;
+                if (iss) {
+                    std::cout << "Executando comando: compra. Nºcaravana: " << n_caravana << " Toneladas: " << n_toneladas << std::endl;
+                    mapa->comprarMercadoria(n_caravana,n_toneladas);
+                } else {
+                    std::cerr << "Erro: Número da caravana não fornecido no comando 'caravana' ou Número de Toneladas não fornecido." << std::endl;
+                }
             } else if (comando == "vende") {
                 int nCaravana;
                 iss >> nCaravana;

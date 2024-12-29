@@ -60,7 +60,6 @@ public:
     void executarInstantes(int n);
     void criarTempestadeAreia(int linha, int coluna, int raio);
 
-
     void adicionarItem(int linha, int coluna);
     void removerItem(int linha, int coluna);
     Item* encontrarItemProximo(int linha, int coluna, int raio) const;
@@ -68,6 +67,7 @@ public:
     void contratarTripulantes(int idCaravana, int quantidade);
     void comprarMercadoria(int idCaravana, int quantidade);
     void venderMercadoria(int idCaravana);
+    void comprarCaravanaCidade(const std::string& cidade, const std::string& tipo);
 
     std::pair<int, int> gerarMovimentoAleatorio(int linha, int coluna) const;
     bool reduzirMoedas(int quantidade);

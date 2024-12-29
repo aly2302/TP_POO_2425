@@ -1,7 +1,9 @@
 precos
-cidade CidadeA
-caravana 1
-vende 2
-move 3 D
+cidade c
+caravana 2
+move 2 BE
+move 2 E
+move 2 E
+compra 2 10
 caravanas_list
 cidades_list
