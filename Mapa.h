@@ -31,6 +31,7 @@ private:
     std::vector<std::unique_ptr<Caravana>> caravanas;
     std::vector<std::unique_ptr<Cidade>> cidades;
     std::vector<Item> itens;
+    std::unordered_map<std::string, std::vector<std::string>> estadosSalvos;
 
 
     int calcularIndice(int linha, int coluna) const;
@@ -102,6 +103,11 @@ public:
     void processarItens();
     void verificarItensAdjacentes(Caravana& caravana);
     void removerItem(int linha, int coluna) const;
+
+    void salvarEstado(const std::string& nome);
+    void carregarEstado(const std::string& nome);
+    void listarEstadosSalvos() const;
+    void apagarEstadoSalvo(const std::string& nome);
 
 };
 

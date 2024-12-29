@@ -116,6 +116,62 @@ Mapa::~Mapa() {
     delete[] grid;
 }
 
+
+void Mapa::salvarEstado(const std::string& nome) {
+    if (estadosSalvos.find(nome) != estadosSalvos.end()) {
+        std::cout << "Erro: Estado com o nome \"" << nome << "\" já existe.\n";
+        return;
+    }
+
+    // Save the current grid as a vector of strings
+    std::vector<std::string> estadoAtual;
+    for (int i = 0; i < linhas; ++i) {
+        std::string linha(grid + i * colunas, colunas);
+        estadoAtual.push_back(linha);
+    }
+
+    estadosSalvos[nome] = estadoAtual;
+    std::cout << "Estado do grid salvo como \"" << nome << "\".\n";
+}
+
+
+void Mapa::carregarEstado(const std::string& nome) {
+    auto it = estadosSalvos.find(nome);
+    if (it == estadosSalvos.end()) {
+        std::cout << "Erro: Estado com o nome \"" << nome << "\" não existe.\n";
+        return;
+    }
+
+    // Display the saved grid state
+    std::cout << "Estado do grid \"" << nome << "\":\n";
+    for (const auto& linha : it->second) {
+        std::cout << linha << '\n';
+    }
+}
+
+
+void Mapa::listarEstadosSalvos() const {
+    if (estadosSalvos.empty()) {
+        std::cout << "Nenhum estado salvo.\n";
+        return;
+    }
+
+    std::cout << "Estados salvos:\n";
+    for (const auto& [nome, _] : estadosSalvos) {
+        std::cout << "- " << nome << '\n';
+    }
+}
+
+
+void Mapa::apagarEstadoSalvo(const std::string& nome) {
+    if (estadosSalvos.erase(nome)) {
+        std::cout << "Estado \"" << nome << "\" apagado.\n";
+    } else {
+        std::cout << "Erro: Estado com o nome \"" << nome << "\" não existe.\n";
+    }
+}
+
+
 const std::vector<std::unique_ptr<Caravana>>& Mapa::getCaravanas() const {
     return caravanas;
 }

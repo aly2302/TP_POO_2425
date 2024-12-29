@@ -195,30 +195,34 @@ int main() {
                     std::cout << "Erro: Parâmetros inválidos ou mapa não configurado.\n";
                 }
             }
-            else if (comando == "saves") { // Verifica se o comando é "saves" (saves <nome>)
-                    iss >> var1; // Extrai o nome
-                    if (!var1.empty()) { // Verifica se o nome do ficheiro não está vazio
-                        std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
+                else if (comando == "saves") {
+                    std::string nome;
+                    iss >> nome;
+                    if (!nome.empty()) {
+                        mapa->salvarEstado(nome);
                     } else {
-                        std::cout << "Erro: Nome não fornecido." << std::endl; // Mensagem de erro se o nome estiver vazio
+                        std::cout << "Erro: Nome do estado não fornecido.\n";
                     }
-                }else if (comando == "loads") { // Verifica se o comando é "loads" (loads <nome>)
-                    iss >> var1; // Extrai o nome
-                    if (!var1.empty()) { // Verifica se o nome não está vazio
-                        std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
+                } else if (comando == "loads") {
+                    std::string nome;
+                    iss >> nome;
+                    if (!nome.empty()) {
+                        mapa->carregarEstado(nome);
                     } else {
-                        std::cout << "Erro: Nome não fornecido." << std::endl; // Mensagem de erro se o nome estiver vazio
+                        std::cout << "Erro: Nome do estado não fornecido.\n";
                     }
-                }else if (comando == "lists") { // Verifica se o comando é "lists"
-                    std::cout << "Comando: " << comando << std::endl;
-                }else if (comando == "dels") { // Verifica se o comando é "dels" (dels <nome>)
-                    iss >> var1; // Extrai o número da tripulação
-                    if (!var1.empty()) { // Verifica se o nome não está vazio
-                        std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
+                } else if (comando == "lists") {
+                    mapa->listarEstadosSalvos();
+                } else if (comando == "dels") {
+                    std::string nome;
+                    iss >> nome;
+                    if (!nome.empty()) {
+                        mapa->apagarEstadoSalvo(nome);
                     } else {
-                        std::cout << "Erro: Nome não fornecido." << std::endl; // Mensagem de erro se o nome estiver vazio
+                        std::cout << "Erro: Nome do estado não fornecido.\n";
                     }
-                }else if (comando == "caravanas_list") { // Verifica se o comando é "dels" (dels <nome>)
+                }
+                else if (comando == "caravanas_list") { // Verifica se o comando é "dels" (dels <nome>)
                     std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
                     mapa->listarCaravanas();
 
