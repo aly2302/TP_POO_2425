@@ -464,8 +464,6 @@ int Mapa::getPrecoCaravana()  const {
     return precoCaravana; // Return the caravan price
 }
 
-
-
 void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
     if (raio <= 0) {
         std::cout << "Erro: O raio deve ser maior que zero.\n";
@@ -495,10 +493,12 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
             if (caravana->getTipo() == "Comercio") {
                 if (rand() % 100 < 50 && caravana->getCargaAtual() > caravana->getCapacidadeCarga() / 2) {
                     std::cout << "Caravana de Comercio " << caravana->getId() << " foi destruida.\n";
+                    atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
                     continue;
                 } else if (rand() % 100 < 25) {
                     std::cout << "Caravana de Comercio " << caravana->getId() << " foi destruida.\n";
+                    atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
                     continue;
                 } else {
@@ -510,6 +510,7 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
                 caravana->removerTripulantes(static_cast<int>(caravana->getTripulantes() * 0.10));
                 if (rand() % 100 < 33) {
                     std::cout << "Caravana Militar " << caravana->getId() << " foi destruida.\n";
+                    atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
                     continue;
                 }
@@ -518,6 +519,7 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
                 caravana->removerTripulantes(static_cast<int>(caravana->getTripulantes() * 0.10));
                 if (rand() % 100 < 25) {
                     std::cout << "Caravana " << caravana->getId() << " foi destruída.\n";
+                    atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
                     continue;
                 }
@@ -527,11 +529,7 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
     }
 
     std::cout << "Tempestade de areia processada.\n";
-
-
 }
-
-
 
 
 bool Mapa::estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const {
@@ -642,43 +640,40 @@ void Mapa::removerItem(int linha, int coluna) {
 }
 
 
-
-
 void Mapa::contratarTripulantes(int idCaravana, int quantidade) {
-    // Encontrar a caravana pelo ID
     auto caravana = std::find_if(caravanas.begin(), caravanas.end(), [idCaravana](const std::unique_ptr<Caravana>& c) {
         return c->getId() == idCaravana;
     });
 
-    if (caravana != caravanas.end()) {
-        // Verificar se está em uma cidade
-        bool estaEmCidade = false;
-        /*
-        for (const auto& cidade : cidades) {
-            if (cidade.getLinha() == (*caravana)->getLinha() && cidade.getColuna() == (*caravana)->getColuna()) {
-                estaEmCidade = true;
-                break;
-            }
-        }
-        */
-        if (!estaEmCidade) {
-            std::cout << "A caravana precisa estar em uma cidade para contratar tripulantes.\n";
-            return;
-        }
+    if (caravana == caravanas.end()) {
+        std::cout << "Erro: Caravana com ID " << idCaravana << " não encontrada.\n";
+        return;
+    }
 
-        // Verificar moedas e contratar tripulantes
-        int custoTotal = quantidade; // 1 moeda por tripulante
-        if (moedas >= custoTotal) {
-            (*caravana)->adicionarTripulantes(quantidade);
-            moedas -= custoTotal;
-            std::cout << "Caravana " << idCaravana << " contratou " << quantidade << " tripulantes.\n";
-        } else {
-            std::cout << "Moedas insuficientes para contratar tripulantes.\n";
+    // Verificar se a caravana está em uma cidade
+    bool estaEmCidade = false;
+    for (const auto& cidade : cidades) {
+        if ((*caravana)->getLinha() == cidade->getLinha() && (*caravana)->getColuna() == cidade->getColuna()) {
+            estaEmCidade = true;
+            break;
         }
+    }
+
+    if (!estaEmCidade) {
+        std::cout << "Erro: Caravana " << idCaravana << " nao esta numa cidade.\n";
+        return;
+    }
+
+    int custo = quantidade; // 1 moeda por tripulante
+    if (moedas >= custo) {
+        (*caravana)->adicionarTripulantes(quantidade);
+        moedas -= custo;
+        std::cout << "Caravana " << idCaravana << " contratou " << quantidade << " tripulantes por " << custo << " moedas.\n";
     } else {
-        std::cout << "Caravana com ID " << idCaravana << " não encontrada.\n";
+        std::cout << "Erro: Moedas insuficientes para contratar tripulantes.\n";
     }
 }
+
 
 
 

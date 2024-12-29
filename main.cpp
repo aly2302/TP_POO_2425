@@ -184,23 +184,15 @@ int main() {
                     } else {
                         std::cout << "Erro: Nº de Moedas não fornecido." << std::endl; // Mensagem de erro se o número de moedas estiver vazio
                     }
-                }else if (comando == "tripul") { // Verifica se o comando é "tripul" (tripul <N> <T>)
-                    int n_tripulacao = 0;
-                    int n_caravana = 0;
-                    iss >> var1; // Extrai o número da tripulação
-                    if (!var1.empty()) { // Verifica se o número da tripulação não está vazio
-                        n_tripulacao = std::stoi(var1); // Converte a string para int
-                        iss >> var2; // Extrai o número da caravana
-                        if (!var2.empty()) { // Verifica se o número da tripulação não está vazio
-                            n_caravana = std::stoi(var2); // Converte a string para int
-                            std::cout << "Comando: " << comando << ", Nº da Tripulação: " << n_tripulacao << ", Nº da Caravana: " << n_caravana << std::endl;
-                        } else {
-                            std::cout << "Erro: Nº da Caravana não fornecido." << std::endl; // Mensagem de erro se o número da caravana estiver vazio
-                        }
-                    } else {
-                        std::cout << "Erro: Nº da Tripulação não fornecido." << std::endl; // Mensagem de erro se o número da tripulação estiver vazio
-                    }
-                }else if (comando == "saves") { // Verifica se o comando é "saves" (saves <nome>)
+                }else if (comando == "tripul") { // Verifica se o comando é "tripul <N> <T>"
+                int idCaravana, quantidade;
+                if (iss >> idCaravana >> quantidade && mapa) {
+                    mapa->contratarTripulantes(idCaravana, quantidade);
+                } else {
+                    std::cout << "Erro: Parâmetros inválidos ou mapa não configurado.\n";
+                }
+            }
+            else if (comando == "saves") { // Verifica se o comando é "saves" (saves <nome>)
                     iss >> var1; // Extrai o nome
                     if (!var1.empty()) { // Verifica se o nome do ficheiro não está vazio
                         std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
