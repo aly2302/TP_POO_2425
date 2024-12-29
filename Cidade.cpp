@@ -1,4 +1,23 @@
 #include "Cidade.h"
+#include "Mapa.h"
+
+// Método para inicializar caravanas
+void Cidade::inicializarCaravanas() {
+    int id_caravana;
+
+    // Inicializa Caravana de Comércio
+    id_caravana = mapa.gerarIDCaravana();
+    caravanasDisponiveis.push_back(std::unique_ptr<Caravana>(new CaravanaComercio(id_caravana, linha, coluna)));
+
+    // Inicializa Caravana Militar
+    id_caravana = mapa.gerarIDCaravana();
+    caravanasDisponiveis.push_back(std::unique_ptr<Caravana>(new CaravanaMilitar(id_caravana, linha, coluna)));
+
+    // Inicializa Caravana Secreta
+    id_caravana = mapa.gerarIDCaravana();
+    caravanasDisponiveis.push_back(std::unique_ptr<Caravana>(new CaravanaSecreta(id_caravana, linha, coluna)));
+}
+
 
 // Método para comprar uma caravana
 bool Cidade::comprarCaravana(char tipo) {

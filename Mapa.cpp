@@ -34,24 +34,37 @@ Mapa::Mapa(const std::string& nomeFicheiro, Buffer* buffer) : buffer(buffer) {
         }
 
 
-    // Processar o grid para adicionar caravanas
+    // Processar o grid para adicionar dados
         for (int i = 0; i < linhas; ++i) {
             for (int j = 0; j < colunas; ++j) {
                 char caracter = grid[i * colunas + j];
 
                 // Verifica se o caractere é um número
                 if (std::isdigit(caracter)) {
-                    int id = caracter - '0';  // Converte o caractere para o valor numérico
+                    int id = gerarIDCaravana();  // Converte o caractere para o valor numérico
+                    std::cout << "ID: " << id << std::endl;
                     // Adiciona uma caravana de comércio na posição correta
-                    adicionarCaravana(std::make_unique<CaravanaComercio>(gerarIDCaravana(), i, j));
+                    adicionarCaravana(std::make_unique<CaravanaComercio>(id, i, j));
                 }
-                    // Verifica se o caractere é um '!' para caravana bárbara
+                // Verifica se o caractere é um '!' para caravana bárbara
                 else if (caracter == '!') {
                     // Adiciona uma caravana bárbara na posição correta
                     adicionarCaravana(std::make_unique<CaravanaBarbara>(gerarIDCaravana(), i, j));
                 }
             }
         }
+
+        // Processar o grid para adicionar as caravanas para venda nas cidades
+        for (int i = 0; i < linhas; ++i) {
+            for (int j = 0; j < colunas; ++j) {
+                char caracter = grid[i * colunas + j];
+
+                if (std::isalpha(caracter)) {
+                    adicionarCidade(std::make_unique<Cidade>(std::string(1, caracter), i, j, *this));
+                }
+            }
+        }
+
 
 
 
@@ -90,6 +103,12 @@ void Mapa::listarCaravanas() const {
                   << ", Tipo: " << caravana->getTipo()
                   << ", Posição: (" << caravana->getLinha() << ", " << caravana->getColuna() << ")"
                   << std::endl;
+    }
+}
+
+void Mapa::listarCidades() const {
+    for (const auto& cidade : cidades) {
+        cidade->imprimirDetalhes();
     }
 }
 
@@ -187,23 +206,16 @@ void Mapa::moverCaravana(int id, int novaLinha, int novaColuna) {
     throw std::runtime_error("Caravana com ID não encontrada.");
 }
 
-/*
-void Mapa::adicionarCidade(const Cidade& cidade) {
-    if (!posicaoValida(cidade.getLinha(), cidade.getColuna())) {
+
+void Mapa::adicionarCidade(std::unique_ptr<Cidade> cidade) {
+    if (!posicaoValida(cidade->getLinha(), cidade->getColuna())) {
         throw std::out_of_range("Posição inválida para adicionar uma cidade.");
     }
-    atualizarGrid(cidade.getLinha(), cidade.getColuna(), 'X'); // 'X' representa uma cidade
-    cidades.push_back(cidade);
+    cidades.push_back(std::move(cidade));
 }
 
 
 
-void Mapa::listarCidades() const {
-    for (const auto& cidade : cidades) {
-        cidade.imprimirDetalhes();
-    }
-}
-*/
 bool Mapa::estaAdjacente(int linha1, int coluna1, int linha2, int coluna2) const {
     return (linha1 == linha2 && std::abs(coluna1 - coluna2) == 1) || // Mesma linha, colunas adjacentes
            (coluna1 == coluna2 && std::abs(linha1 - linha2) == 1);   // Mesma coluna, linhas adjacentes

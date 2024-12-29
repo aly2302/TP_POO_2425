@@ -253,7 +253,11 @@ int main() {
                     std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
                     mapa->listarCaravanas();
 
-                }else if (comando == "terminar") { // Verifica se o comando é "terminar"
+                }else if (comando == "cidades_list") { // Verifica se o comando é "dels" (dels <nome>)
+                std::cout << "Comando: " << comando << ", Nome: " << var1 << std::endl;
+                mapa->listarCidades();
+
+            }else if (comando == "terminar") { // Verifica se o comando é "terminar"
                     executando = false;
                     std::cout << "Terminando o programa..." << std::endl;
                     break;

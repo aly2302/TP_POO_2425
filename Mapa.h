@@ -4,9 +4,10 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include "Caravana.h"
 #include "Item.h"
 #include "Buffer.h"
+#include "Cidade.h"
+#include "Caravana.h"
 
 class Mapa {
 private:
@@ -26,6 +27,7 @@ private:
     int duracaoBarbaros;
 
     std::vector<std::unique_ptr<Caravana>> caravanas;
+    std::vector<std::unique_ptr<Cidade>> cidades;
     std::vector<Item> itens;
 
     int calcularIndice(int linha, int coluna) const;
@@ -77,6 +79,9 @@ public:
     const std::vector<std::unique_ptr<Caravana>>& getCaravanas() const;
 
     void listagem_precos() const;
+
+    void adicionarCidade(std::unique_ptr<Cidade> cidade);
+    void listarCidades() const;
 };
 
 #endif // TP_POO_2425_MAPA_H

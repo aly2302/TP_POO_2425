@@ -186,6 +186,6 @@ CMakeFiles/TP_POO_2425.dir/Cidade.cpp.obj: \
  D:/CLion\ 2023.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/ranges_algo.h \
  D:/CLion\ 2023.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/pstl/glue_algorithm_defs.h \
  C:\Users\Utilizador\Downloads\TP_POO_2425-master\ (2)\TP_POO_2425-master\Mapa.h \
- C:\Users\Utilizador\Downloads\TP_POO_2425-master\ (2)\TP_POO_2425-master\Caravana.h \
  C:\Users\Utilizador\Downloads\TP_POO_2425-master\ (2)\TP_POO_2425-master\Item.h \
- C:\Users\Utilizador\Downloads\TP_POO_2425-master\ (2)\TP_POO_2425-master\Buffer.h
+ C:\Users\Utilizador\Downloads\TP_POO_2425-master\ (2)\TP_POO_2425-master\Buffer.h \
+ C:\Users\Utilizador\Downloads\TP_POO_2425-master\ (2)\TP_POO_2425-master\Caravana.h
