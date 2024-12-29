@@ -311,7 +311,6 @@ std::pair<int, int> Mapa::gerarMovimentoAleatorio(int linha, int coluna) const {
 }
 
 
-
 std::unordered_set<int> caravanasAuto;
 void Mapa::ativarAutoMover(int idCaravana) {
     for (const auto& caravana : caravanas) {
@@ -360,7 +359,6 @@ void Mapa::executarInstantes(int n) {
         imprimirMapa();                  // Exibe o mapa após os movimentos
     }
 }
-
 
 
 void Mapa::comprarMercadoria(int idCaravana, int quantidade) {
@@ -425,6 +423,90 @@ int Mapa::getPrecoCaravana()  const {
 }
 
 
+void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
+    if (raio <= 0) {
+        std::cout << "Erro: O raio deve ser maior que zero.\n";
+        return;
+    }
+
+    // Determinar os limites da área afetada
+    int inicioLinha = std::max(0, linha - raio);
+    int fimLinha = std::min(linhas - 1, linha + raio);
+    int inicioColuna = std::max(0, coluna - raio);
+    int fimColuna = std::min(colunas - 1, coluna + raio);
+
+    std::cout << "A criar tempestade de areia na area centrada em (" << linha << ", " << coluna << ") com raio " << raio << ".\n";
+
+    // Iterar por todas as caravanas para verificar quais estão na área afetada
+    for (auto it = caravanas.begin(); it != caravanas.end();) {
+        auto& caravana = *it;
+        int linhaCaravana = caravana->getLinha();
+        int colunaCaravana = caravana->getColuna();
+
+        // Verificar se a caravana está dentro da área afetada
+        if (linhaCaravana >= inicioLinha && linhaCaravana <= fimLinha &&
+            colunaCaravana >= inicioColuna && colunaCaravana <= fimColuna) {
+            std::cout << "Caravana " << caravana->getId() << " foi atingida pela tempestade de areia.\n";
+
+            // Aplicar efeitos dependendo do tipo da caravana
+            if (caravana->getTipo() == "Comercio") {
+                if (rand() % 100 < 50 && caravana->getCargaAtual() > caravana->getCapacidadeCarga() / 2) {
+                    std::cout << "Caravana de Comercio " << caravana->getId() << " foi destruida.\n";
+                    it = caravanas.erase(it); // Remove caravana destruída
+                    continue;
+                } else if (rand() % 100 < 25) {
+                    std::cout << "Caravana de Comercio " << caravana->getId() << " foi destruida.\n";
+                    it = caravanas.erase(it); // Remove caravana destruída
+                    continue;
+                } else {
+                    std::cout << "Caravana de Comercio " << caravana->getId() << " perdeu 25% da carga.\n";
+                    caravana->removerCarga(static_cast<int>(caravana->getCargaAtual() * 0.25));
+                }
+            } else if (caravana->getTipo() == "Militar") {
+                std::cout << "Caravana Militar " << caravana->getId() << " perdeu 10% dos tripulantes.\n";
+                caravana->removerTripulantes(static_cast<int>(caravana->getTripulantes() * 0.10));
+                if (rand() % 100 < 33) {
+                    std::cout << "Caravana Militar " << caravana->getId() << " foi destruida.\n";
+                    it = caravanas.erase(it); // Remove caravana destruída
+                    continue;
+                }
+            } else {
+                std::cout << "Caravana " << caravana->getId() << " perdeu 10% dos tripulantes.\n";
+                caravana->removerTripulantes(static_cast<int>(caravana->getTripulantes() * 0.10));
+                if (rand() % 100 < 25) {
+                    std::cout << "Caravana " << caravana->getId() << " foi destruída.\n";
+                    it = caravanas.erase(it); // Remove caravana destruída
+                    continue;
+                }
+            }
+        }
+        ++it; // Avança o iterador se a caravana não for destruída
+    }
+
+    std::cout << "Tempestade de areia processada.\n";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -447,12 +529,6 @@ std::vector<std::pair<int, int>> Mapa::encontrarCaravanasAdjacentes(int linha, i
 }
 
 
-
-
-
-
-
-
 void Mapa::adicionarItem(int linha, int coluna) {
     if (itens.size() < maxItens && posicaoValida(linha, coluna)) {
         Item item{linha, coluna, 'I', duracaoItem};
@@ -471,6 +547,18 @@ Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
     }
     return nullptr;
 }
+
+void Mapa::removerItem(int linha, int coluna) {
+    auto it = std::find_if(itens.begin(), itens.end(), [linha, coluna](const Item& item) {
+        return item.linha == linha && item.coluna == coluna;
+    });
+
+    if (it != itens.end()) {
+        itens.erase(it);
+    }
+}
+
+
 
 void Mapa::adicionarCaravanaBarbaraAleatoria() {
     int linha = std::rand() % linhas;
@@ -494,6 +582,7 @@ Caravana* Mapa::encontrarCaravanaBarbaraProxima(int linha, int coluna, int raio)
     return nullptr;
 }
 
+/*
 void Mapa::atualizarBuffer() {
     buffer->limparBuffer();
 
@@ -511,19 +600,10 @@ void Mapa::atualizarBuffer() {
     *buffer << "Caravanas: " << caravanas.size() << "\n";
     /*
     *buffer << "Cidades: " << cidades.size() << "\n";
-    */
+
     *buffer << "Itens: " << itens.size() << "\n";
 }
-
-void Mapa::removerItem(int linha, int coluna) {
-    auto it = std::find_if(itens.begin(), itens.end(), [linha, coluna](const Item& item) {
-        return item.linha == linha && item.coluna == coluna;
-    });
-
-    if (it != itens.end()) {
-        itens.erase(it);
-    }
-}
+*/
 
 
 
@@ -563,48 +643,6 @@ void Mapa::contratarTripulantes(int idCaravana, int quantidade) {
     }
 }
 
-
-
-
-/*
-void Mapa::executarSimulacao() {
-    bool houveMudanca = false;
-
-    // Movimentação automática das caravanas
-    for (auto& caravana : caravanas) {
-        auto posAnterior = std::make_pair(caravana->getLinha(), caravana->getColuna());
-        caravana->executarComportamento(*this);
-        auto posAtual = std::make_pair(caravana->getLinha(), caravana->getColuna());
-
-        if (posAnterior != posAtual) {
-            std::cout << "Caravana " << caravana->getId()
-                      << " moveu-se de (" << posAnterior.first << ", " << posAnterior.second
-                      << ") para (" << posAtual.first << ", " << posAtual.second << ")." << std::endl;
-            houveMudanca = true;
-        }
-    }
-
-    // Gerar novos itens, respeitando o limite de itens no mapa
-    if (itens.size() < static_cast<size_t>(maxItens)) {
-        adicionarItemAleatorio();
-        houveMudanca = true;
-    }
-
-    // Gerar novas caravanas bárbaras, respeitando o intervalo configurado
-    static int contadorBarbaros = 0;
-    if (++contadorBarbaros >= instantesEntreNovosBarbaros) {
-        adicionarCaravanaBarbaraAleatoria();
-        contadorBarbaros = 0;
-        houveMudanca = true;
-    }
-
-    // Atualizar o buffer apenas se houve mudanças
-    if (houveMudanca) {
-        atualizarBuffer();
-        buffer->imprimirBuffer();
-    }
-}
-*/
 
 void Mapa::listagem_precos() const {
     std::cout << "Preço de Compra da Mercadoria: " << precoCompraMercadoria << std::endl;

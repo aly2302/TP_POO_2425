@@ -58,6 +58,8 @@ public:
     void desativarAutoMover(int idCaravana);
     void processarMovimentosAutomaticos();
     void executarInstantes(int n);
+    void criarTempestadeAreia(int linha, int coluna, int raio);
+
 
     void adicionarItem(int linha, int coluna);
     void removerItem(int linha, int coluna);
