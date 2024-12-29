@@ -8,6 +8,8 @@
 #include "Buffer.h"
 #include "Cidade.h"
 #include "Caravana.h"
+#include <unordered_map>
+
 
 class Mapa {
 private:
@@ -29,6 +31,7 @@ private:
     std::vector<std::unique_ptr<Caravana>> caravanas;
     std::vector<std::unique_ptr<Cidade>> cidades;
     std::vector<Item> itens;
+
 
     int calcularIndice(int linha, int coluna) const;
     bool posicaoValida(int linha, int coluna) const;
