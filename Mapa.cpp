@@ -703,11 +703,6 @@ std::vector<std::pair<int, int>> Mapa::encontrarCaravanasAdjacentes(int linha, i
 }
 
 
-
-
-
-
-
 Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
     for (auto& item : itens) {
         int distLinha = std::abs(item.linha - linha);
@@ -718,17 +713,6 @@ Item* Mapa::encontrarItemProximo(int linha, int coluna, int raio) const {
     }
     return nullptr;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 void Mapa::adicionarCaravanaBarbara(int linha, int coluna) {
@@ -821,49 +805,6 @@ void Mapa::contratarTripulantes(int idCaravana, int quantidade) {
 }
 
 
-
-
-
-/*
-void Mapa::executarSimulacao() {
-    bool houveMudanca = false;
-
-    // Movimentação automática das caravanas
-    for (auto& caravana : caravanas) {
-        auto posAnterior = std::make_pair(caravana->getLinha(), caravana->getColuna());
-        caravana->executarComportamento(*this);
-        auto posAtual = std::make_pair(caravana->getLinha(), caravana->getColuna());
-
-        if (posAnterior != posAtual) {
-            std::cout << "Caravana " << caravana->getId()
-                      << " moveu-se de (" << posAnterior.first << ", " << posAnterior.second
-                      << ") para (" << posAtual.first << ", " << posAtual.second << ")." << std::endl;
-            houveMudanca = true;
-        }
-    }
-
-    // Gerar novos itens, respeitando o limite de itens no mapa
-    if (itens.size() < static_cast<size_t>(maxItens)) {
-        adicionarItemAleatorio();
-        houveMudanca = true;
-    }
-
-    // Gerar novas caravanas bárbaras, respeitando o intervalo configurado
-    static int contadorBarbaros = 0;
-    if (++contadorBarbaros >= instantesEntreNovosBarbaros) {
-        adicionarCaravanaBarbaraAleatoria();
-        contadorBarbaros = 0;
-        houveMudanca = true;
-    }
-
-    // Atualizar o buffer apenas se houve mudanças
-    if (houveMudanca) {
-        atualizarBuffer();
-        buffer->imprimirBuffer();
-    }
-}
-*/
-
 void Mapa::listagem_precos() const {
     std::cout << "Preço de Compra da Mercadoria: " << precoCompraMercadoria << std::endl;
     std::cout << "Preço de Venda da Mercadoria: " << precoVendaMercadoria << std::endl;
@@ -885,7 +826,6 @@ void Mapa::gerarItensAleatorios() {
         }
     }
 }
-
 
 void Mapa::processarItens() {
     for (auto it = itens.begin(); it != itens.end();) {
