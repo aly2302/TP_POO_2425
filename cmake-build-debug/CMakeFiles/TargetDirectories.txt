@@ -1,3 +1,3 @@
-C:/Users/Utilizador/Downloads/TP_POO_2425-master (2)/TP_POO_2425-master/cmake-build-debug/CMakeFiles/TP_POO_2425.dir
-C:/Users/Utilizador/Downloads/TP_POO_2425-master (2)/TP_POO_2425-master/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/Utilizador/Downloads/TP_POO_2425-master (2)/TP_POO_2425-master/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/rodri/ISEC-2425/POO/TP_POO_2425/cmake-build-debug/CMakeFiles/TP_POO_2425.dir
+C:/Users/rodri/ISEC-2425/POO/TP_POO_2425/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/rodri/ISEC-2425/POO/TP_POO_2425/cmake-build-debug/CMakeFiles/rebuild_cache.dir
