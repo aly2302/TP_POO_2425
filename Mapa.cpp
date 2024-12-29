@@ -63,13 +63,22 @@ Mapa::Mapa(const std::string& nomeFicheiro, Buffer* buffer) : buffer(buffer) {
                         adicionarCaravana(std::make_unique<CaravanaSecreta>(id, i, j));
                     }
                 }
-                    // Verifica se o caractere é um '!' para caravana bárbara
-                else if (caracter == '!') {
+            }
+        }
+
+        for (int i = 0; i < linhas; ++i) {
+            for (int j = 0; j < colunas; ++j) {
+                char caracter = grid[i * colunas + j];
+
+                // Verifica se o caractere é um '!' para caravana bárbara
+                if (caracter == '!') {
                     // Adiciona uma caravana bárbara na posição correta
                     adicionarCaravana(std::make_unique<CaravanaBarbara>(gerarIDCaravana(), i, j));
                 }
             }
         }
+
+
 
         // Processar o grid para adicionar as caravanas para venda nas cidades
         for (int i = 0; i < linhas; ++i) {
@@ -409,9 +418,16 @@ void Mapa::resolverCombate(Caravana& vencedora, Caravana& perdedora) {
 
     if (perdedora.getTripulantes() <= 0) {
         vencedora.adicionarCarga(perdedora.getAguaAtual());
-        caravanas.erase(std::remove_if(caravanas.begin(), caravanas.end(),
-                                       [&perdedora](const std::unique_ptr<Caravana>& c) { return c.get() == &perdedora; }),
-                        caravanas.end());
+        atualizarGrid(perdedora.getLinha(), perdedora.getColuna(), '.');
+        if(vencedora.getTipo() == "Barbara"){
+            atualizarGrid(vencedora.getLinha(), vencedora.getColuna(), '!');
+        }
+        caravanas.erase(std::remove_if(caravanas.begin(),
+                                       caravanas.end(),
+                                       [&perdedora](const std::unique_ptr<Caravana>& c)
+                                       { return c.get() == &perdedora; }),caravanas.end());
+
+        std::cout << "Venceu a caravana do tipo " << vencedora.getTipo() << std::endl;
     }
 }
 
