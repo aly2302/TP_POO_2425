@@ -95,6 +95,21 @@ void executarComandosDeFicheiro(const std::string& nomeFicheiro, Mapa* mapa, Buf
                 } else {
                     std::cerr << "Erro: Parâmetros inválidos no comando 'tripul'." << std::endl;
                 }
+            } else if (comando == "move") {
+                int n_caravana = 0;
+                std::string posicao;
+                if (iss >> n_caravana >> posicao) {
+                    mapa->moverCaravana(n_caravana, posicao);
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'move'." << std::endl;
+                }
+            } else if (comando == "caravanas_list") {
+                mapa->listarCaravanas();
+            } else if (comando == "cidades_list") {
+                mapa->listarCidades();
+            } else if (comando == "terminar") {
+                std::cout << "Comando: terminar. Finalizando execução dos comandos..." << std::endl;
+                break; // Finaliza a execução do loop
             } else {
                 std::cerr << "Comando desconhecido: " << comando << std::endl;
             }
