@@ -20,7 +20,62 @@ void executarComandosDeFicheiro(const std::string& nomeFicheiro, Mapa* mapa, Buf
         iss >> comando;
 
         if (segunda_fase) {
-            if (comando == "saves") {
+            if (comando == "comprac") {
+                std::string cidade, tipoCaravana;
+                if (iss >> cidade >> tipoCaravana) {
+                    mapa->comprarCaravanaCidade(cidade, tipoCaravana);
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'comprac'." << std::endl;
+                }
+            } else if (comando == "cidade") {
+                std::string cidade;
+                if (iss >> cidade) {
+                    mapa->listarCidade(cidade);
+                } else {
+                    std::cerr << "Erro: Nome da cidade não fornecido no comando 'cidade'." << std::endl;
+                }
+            } else if (comando == "caravana") {
+                int idCaravana;
+                if (iss >> idCaravana) {
+                    mapa->listarCaravana(idCaravana);
+                } else {
+                    std::cerr << "Erro: ID da caravana inválido no comando 'caravana'." << std::endl;
+                }
+            } else if (comando == "compra") {
+                int idCaravana, toneladas;
+                if (iss >> idCaravana >> toneladas) {
+                    mapa->comprarMercadoria(idCaravana, toneladas);
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'compra'." << std::endl;
+                }
+            } else if (comando == "vende") {
+                int idCaravana;
+                if (iss >> idCaravana) {
+                    mapa->venderMercadoria(idCaravana);
+                } else {
+                    std::cerr << "Erro: ID da caravana inválido no comando 'vende'." << std::endl;
+                }
+            } else if (comando == "move") {
+                int idCaravana;
+                std::string posicao;
+                if (iss >> idCaravana >> posicao) {
+                    try {
+                        mapa->moverCaravana(idCaravana, posicao);
+                        std::cout << "Comando 'move' executado: Caravana " << idCaravana << " movida para " << posicao << ".\n";
+                    } catch (const std::exception& e) {
+                        std::cerr << "Erro ao mover caravana: " << e.what() << std::endl;
+                    }
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'move'." << std::endl;
+                }
+            } else if (comando == "caravanas_list") {
+                mapa->listarCaravanas();
+            } else if (comando == "cidades_list") {
+                mapa->listarCidades();
+            } else if (comando == "terminar") {
+                std::cout << "Comando: terminar. Finalizando execução dos comandos..." << std::endl;
+                break;
+            } else if (comando == "saves") {
                 std::string nome;
                 iss >> nome;
                 if (!nome.empty()) {
@@ -95,21 +150,6 @@ void executarComandosDeFicheiro(const std::string& nomeFicheiro, Mapa* mapa, Buf
                 } else {
                     std::cerr << "Erro: Parâmetros inválidos no comando 'tripul'." << std::endl;
                 }
-            } else if (comando == "move") {
-                int n_caravana = 0;
-                std::string posicao;
-                if (iss >> n_caravana >> posicao) {
-                    mapa->moverCaravana(n_caravana, posicao);
-                } else {
-                    std::cerr << "Erro: Parâmetros inválidos no comando 'move'." << std::endl;
-                }
-            } else if (comando == "caravanas_list") {
-                mapa->listarCaravanas();
-            } else if (comando == "cidades_list") {
-                mapa->listarCidades();
-            } else if (comando == "terminar") {
-                std::cout << "Comando: terminar. Finalizando execução dos comandos..." << std::endl;
-                break; // Finaliza a execução do loop
             } else {
                 std::cerr << "Comando desconhecido: " << comando << std::endl;
             }
