@@ -646,11 +646,13 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
             // Aplicar efeitos dependendo do tipo da caravana
             if (caravana->getTipo() == "Comercio") {
                 if (rand() % 100 < 50 && caravana->getCargaAtual() > caravana->getCapacidadeCarga() / 2) {
+                    desativarAutoMover(caravana->getId());
                     std::cout << "Caravana de Comercio " << caravana->getId() << " foi destruida.\n";
                     atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
                     continue;
                 } else if (rand() % 100 < 25) {
+                    desativarAutoMover(caravana->getId());
                     std::cout << "Caravana de Comercio " << caravana->getId() << " foi destruida.\n";
                     atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
@@ -663,6 +665,7 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
                 std::cout << "Caravana Militar " << caravana->getId() << " perdeu 10% dos tripulantes.\n";
                 caravana->removerTripulantes(static_cast<int>(caravana->getTripulantes() * 0.10));
                 if (rand() % 100 < 33) {
+                    desativarAutoMover(caravana->getId());
                     std::cout << "Caravana Militar " << caravana->getId() << " foi destruida.\n";
                     atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída
@@ -672,6 +675,7 @@ void Mapa::criarTempestadeAreia(int linha, int coluna, int raio) {
                 std::cout << "Caravana " << caravana->getId() << " perdeu 10% dos tripulantes.\n";
                 caravana->removerTripulantes(static_cast<int>(caravana->getTripulantes() * 0.10));
                 if (rand() % 100 < 25) {
+                    desativarAutoMover(caravana->getId());
                     std::cout << "Caravana " << caravana->getId() << " foi destruída.\n";
                     atualizarGrid(linhaCaravana, colunaCaravana, '.'); // Limpa a posição no grid
                     it = caravanas.erase(it); // Remove caravana destruída

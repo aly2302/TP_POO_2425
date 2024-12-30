@@ -1,4 +1,27 @@
+saves estado_inicial
 move 1 D
-move 2 D
-move 1 E
+move 1 D
+move 2 BE
+move 2 E
+move 2 E
+tripul 2 3
+auto 1
+auto 2
+saves estado_movimentos
+barbaro 4 5
+saves estado_pre_batalha
+prox 5
+saves estado_pos_batalha
+loads estado_pre_batalha
+loads estado_pos_batalha
+areia 6 6 2
+comprac c M
 caravanas_list
+auto 10
+moedas 50
+prox 5
+caravanas_list
+cidades_list
+saves estado_pos_areia
+loads estado_inicial
+terminar
