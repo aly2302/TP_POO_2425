@@ -20,62 +20,81 @@ void executarComandosDeFicheiro(const std::string& nomeFicheiro, Mapa* mapa, Buf
         iss >> comando;
 
         if (segunda_fase) {
-            if (comando == "precos") {
-                std::cout << "Executando comando: precos" << std::endl;
-                mapa->listagem_precos();
-            } else if (comando == "cidade") {
-                std::string cidade;
-                iss >> cidade;
-                if (!cidade.empty()) {
-                    std::cout << "Executando comando: cidade " << cidade << std::endl;
-                    mapa->listarCidade(cidade);
+            if (comando == "saves") {
+                std::string nome;
+                iss >> nome;
+                if (!nome.empty()) {
+                    mapa->salvarEstado(nome);
                 } else {
-                    std::cerr << "Erro: Nome da cidade não fornecido no comando 'cidade'." << std::endl;
+                    std::cerr << "Erro: Nome do estado não fornecido no comando 'saves'." << std::endl;
                 }
-            } else if (comando == "caravana") {
-                int nCaravana;
-                iss >> nCaravana;
-                if (iss) {
-                    std::cout << "Executando comando: caravana " << nCaravana << std::endl;
-                    mapa->listarCaravana(nCaravana);
+            } else if (comando == "loads") {
+                std::string nome;
+                iss >> nome;
+                if (!nome.empty()) {
+                    mapa->carregarEstado(nome);
                 } else {
-                    std::cerr << "Erro: Número da caravana não fornecido no comando 'caravana'." << std::endl;
+                    std::cerr << "Erro: Nome do estado não fornecido no comando 'loads'." << std::endl;
                 }
-            }else if (comando == "compra") { // Verifica se o comando é "compra" (compra <N> <M>)
-                int n_caravana;
-                int n_toneladas;
-                iss >> n_caravana >> n_toneladas;
-                if (iss) {
-                    std::cout << "Executando comando: compra. Nºcaravana: " << n_caravana << " Toneladas: " << n_toneladas << std::endl;
-                    mapa->comprarMercadoria(n_caravana,n_toneladas);
+            } else if (comando == "lists") {
+                mapa->listarEstadosSalvos();
+            } else if (comando == "dels") {
+                std::string nome;
+                iss >> nome;
+                if (!nome.empty()) {
+                    mapa->apagarEstadoSalvo(nome);
                 } else {
-                    std::cerr << "Erro: Número da caravana não fornecido no comando 'caravana' ou Número de Toneladas não fornecido." << std::endl;
+                    std::cerr << "Erro: Nome do estado não fornecido no comando 'dels'." << std::endl;
                 }
-            } else if (comando == "vende") {
-                int nCaravana;
-                iss >> nCaravana;
-                if (iss) {
-                    std::cout << "Executando comando: vende " << nCaravana << std::endl;
-                    mapa->venderMercadoria(nCaravana);
+            } else if (comando == "auto") {
+                int idCaravana;
+                if (iss >> idCaravana) {
+                    mapa->ativarAutoMover(idCaravana);
                 } else {
-                    std::cerr << "Erro: Número da caravana não fornecido no comando 'vende'." << std::endl;
+                    std::cerr << "Erro: ID da caravana inválido no comando 'auto'." << std::endl;
                 }
-            } else if (comando == "move") {
-                int nCaravana;
-                std::string direcao;
-                iss >> nCaravana >> direcao;
-                if (iss && !direcao.empty()) {
-                    std::cout << "Executando comando: move " << nCaravana << " " << direcao << std::endl;
-                    mapa->moverCaravana(nCaravana, direcao);
+            } else if (comando == "stop") {
+                int idCaravana;
+                if (iss >> idCaravana) {
+                    mapa->desativarAutoMover(idCaravana);
                 } else {
-                    std::cerr << "Erro: Argumentos insuficientes no comando 'move'." << std::endl;
+                    std::cerr << "Erro: ID da caravana inválido no comando 'stop'." << std::endl;
                 }
-            } else if (comando == "caravanas_list") {
-                std::cout << "Executando comando: caravanas_list" << std::endl;
-                mapa->listarCaravanas();
-            } else if (comando == "cidades_list") {
-                std::cout << "Executando comando: cidades_list" << std::endl;
-                mapa->listarCidades();
+            } else if (comando == "prox") {
+                int instantes = 1; // Valor padrão
+                if (iss >> instantes && instantes > 0) {
+                    mapa->executarInstantes(instantes);
+                } else {
+                    mapa->executarInstantes(instantes); // Avança um instante por padrão
+                }
+            } else if (comando == "barbaro") {
+                int x, y;
+                if (iss >> x >> y) {
+                    mapa->adicionarCaravanaBarbara(x, y);
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'barbaro'." << std::endl;
+                }
+            } else if (comando == "areia") {
+                int linha, coluna, raio;
+                if (iss >> linha >> coluna >> raio) {
+                    mapa->criarTempestadeAreia(linha, coluna, raio);
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'areia'." << std::endl;
+                }
+            } else if (comando == "moedas") {
+                int moedas;
+                if (iss >> moedas) {
+                    mapa->addMoedas(moedas);
+                } else {
+                    std::cerr << "Erro: Valor inválido no comando 'moedas'." << std::endl;
+                }
+            } else if (comando == "tripul") {
+                int idCaravana, quantidade;
+                if (iss >> idCaravana >> quantidade) {
+                    mapa->contratarTripulantes(idCaravana, quantidade);
+                } else {
+                    std::cerr << "Erro: Parâmetros inválidos no comando 'tripul'." << std::endl;
+                }
             } else {
                 std::cerr << "Comando desconhecido: " << comando << std::endl;
             }
